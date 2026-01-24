@@ -59,7 +59,7 @@
                     <MudText Typo="Typo.caption">Flag</MudText>
                 </MudButton>
             }
-            @if (Comment.Id == AppStateService.CurrentUser?.Id)
+            @if (Comment.Id == AppStateService.CurrentUser?.Id || IsAdmin)
             {
                 <MudButton Variant="Variant.Text" OnClick="() => Delete(Comment.NewsFeedCommentId)" Size="Size.Small">
                     <MudText Typo="Typo.caption">Delete</MudText>
