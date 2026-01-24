@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using MVC.WebAPI.Data;
-using Newtonsoft.Json.Linq;
 using System.Text;
 using WebAPI.ApplicationDBContextService;
 using WebAPI.NotifyHub;
