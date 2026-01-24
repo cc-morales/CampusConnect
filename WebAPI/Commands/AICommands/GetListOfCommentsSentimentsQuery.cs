@@ -23,13 +23,14 @@ namespace WebAPI.Commands.AICommands
 
         public async Task<Result<List<NewsFeedCommentModel>>> Handle(GetListOfCommentsSentimentsQuery request, CancellationToken cancellationToken)
         {
-            var comments = await GetDBContext().NewsFeedComments.ToListAsync(cancellationToken);
+            var comments = GetDBContext().NewsFeedComments.AsQueryable();
 
-            comments = comments.Where(c => !c.IsFlagged && !c.IsDeleted).ToList();
+            var currentComments = comments.Where(c => !c.IsFlagged && !c.IsDeleted);
+
             //AI for sentiment analysis simulation
-            var sentimentsAI = await _geminiService.ModerateCommentsAsync(comments, request.Sentiments);
+            var sentimentsAI = await _geminiService.ModerateCommentsAsync(currentComments, request.Sentiments);
 
-            var results = comments.Where(c => sentimentsAI.Any(s => s == c.NewsFeedCommentId)).ToList();
+            var results = await currentComments.Where(c => sentimentsAI.Any(s => s == c.NewsFeedCommentId)).ToListAsync(cancellationToken);
            
             return Result.Success(results);
         }

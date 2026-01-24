@@ -21,7 +21,7 @@ namespace WebAPI.Services.GeminiServices
             GeminiApiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/{_configuration["Gemini:Agent"]}:generateContent";
         }
 
-        public async Task<List<Guid>> ModerateCommentsAsync(List<NewsFeedCommentModel> comments, List<string> badWords)
+        public async Task<List<Guid>> ModerateCommentsAsync(IQueryable<NewsFeedCommentModel> comments, List<string> badWords)
         {
             var dictionary = comments.ToDictionary(c => c.NewsFeedCommentId, c => c.Message);
 

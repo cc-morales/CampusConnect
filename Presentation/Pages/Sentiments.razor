@@ -63,6 +63,8 @@
         foreach (var comment in flagComments)
         {
             comment.User = await UserService.GetUserById(comment.Id);
+
+            StateHasChanged();
         }
 
         isLoading = false;

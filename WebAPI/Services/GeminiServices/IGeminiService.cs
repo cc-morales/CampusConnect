@@ -4,6 +4,6 @@ namespace WebAPI.Services.GeminiServices
 {
     public interface IGeminiService
     {
-        Task<List<Guid>> ModerateCommentsAsync(List<NewsFeedCommentModel> comments, List<string> badWords);
+        Task<List<Guid>> ModerateCommentsAsync(IQueryable<NewsFeedCommentModel> comments, List<string> badWords);
     }
 }
