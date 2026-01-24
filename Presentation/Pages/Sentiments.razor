@@ -6,7 +6,7 @@
         <MudTextField @bind-Value="_sentiment" Variant="Variant.Outlined" Label="Sentiment" ShrinkLabel AdornmentIcon="@Icons.Material.Filled.Add"
                       Adornment="Adornment.End" OnAdornmentClick="Enter" DebounceInterval="500"></MudTextField>
     </div>
-    <MudStack Spacing="1" Row>
+    <MudStack Spacing="1" Wrap="Wrap.Wrap" Row>
         
         @foreach (var sentiment in sentiments)
         {
@@ -22,7 +22,10 @@
     {
         @foreach (var item in flagComments)
         {
-            <CommentComponent Comment="item" IsAdmin />
+            <CommentComponent 
+                Comment="item" 
+                IsAdmin 
+                User="item.User"/>
         }
     }
 
@@ -59,13 +62,6 @@
         sentiments = await _sentimentService.GetSentimentsAsync();
 
         flagComments = await _geminiService.AnalyzeSentimentsAsync(sentiments.Select(c => c.Name).ToList());
-
-        foreach (var comment in flagComments)
-        {
-            comment.User = await UserService.GetUserById(comment.Id);
-
-            StateHasChanged();
-        }
 
         isLoading = false;
 

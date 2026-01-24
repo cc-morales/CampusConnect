@@ -30,7 +30,30 @@ namespace WebAPI.Commands.AICommands
             //AI for sentiment analysis simulation
             var sentimentsAI = await _geminiService.ModerateCommentsAsync(currentComments, request.Sentiments);
 
-            var results = await currentComments.Where(c => sentimentsAI.Any(s => s == c.NewsFeedCommentId)).ToListAsync(cancellationToken);
+            var results = await currentComments
+                .Include(c => c.User).ThenInclude(c => c.ProfileInformation)
+                .Where(c => sentimentsAI.Any(s => s == c.NewsFeedCommentId))
+                .Select(c => new NewsFeedCommentModel
+                {
+                    NewsFeedCommentId = c.NewsFeedCommentId,
+                    NewsFeedId = c.NewsFeedId,
+                    Message = c.Message,
+                    CreatedAt = c.CreatedAt,
+                    IsFlagged = c.IsFlagged,
+                    IsDeleted = c.IsDeleted,
+                    User = new ApplicationUserModel
+                    {
+                        UserName = c.User.UserName,
+                        Email = c.User.Email,
+                        Name = c.User.Name,
+                        ProfileInformation = new ProfileInfo()
+                        {
+                            FullName = c.User.ProfileInformation.FullName,
+                            ProfilePicture = c.User.ProfileInformation.ProfilePicture,
+                        }
+                    }
+                })
+                .ToListAsync(cancellationToken);
            
             return Result.Success(results);
         }

@@ -65,9 +65,12 @@
                     <MudText Typo="Typo.caption">Delete</MudText>
                 </MudButton>
             }
-            <MudButton Variant="Variant.Text" OnClick="Reply" Size="Size.Small">
-                <MudText Typo="Typo.caption">Reply</MudText>
-            </MudButton>
+            @if (!IsAdmin)
+            {
+                <MudButton Variant="Variant.Text" OnClick="Reply" Size="Size.Small">
+                    <MudText Typo="Typo.caption">Reply</MudText>
+                </MudButton>
+            }
         } else
         {
             <div style="height: 30px;"></div>
