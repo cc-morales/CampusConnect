@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using MVC.WebAPI.Data;
-using Newtonsoft.Json.Linq;
 using System.Text;
 using WebAPI.ApplicationDBContextService;
 using WebAPI.NotifyHub;
@@ -96,7 +95,7 @@ builder.Services.AddCors(options =>
     {
         policy.AllowAnyOrigin() // Blazor WASM dev URL
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod().WithExposedHeaders("ETag", "X-Pagination");
     });
 });
 
@@ -124,6 +123,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// existing mapping of controllers/endpoints
 app.MapControllers();
 
 await DbSeeder.SeedData(app);

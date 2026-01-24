@@ -1,12 +1,12 @@
 ﻿@page "/sentiments"
 
 <PageTitle>Sentiment</PageTitle>
-<MudStack Class="position-relative" Spacing="1"  Style="height: calc(100vh - 120px); overflow-y: auto;">
+<MudStack Class="position-relative pa-2" Spacing="1"  Style="height: calc(100vh - 120px); overflow-y: auto;">
     <div>
         <MudTextField @bind-Value="_sentiment" Variant="Variant.Outlined" Label="Sentiment" ShrinkLabel AdornmentIcon="@Icons.Material.Filled.Add"
                       Adornment="Adornment.End" OnAdornmentClick="Enter" DebounceInterval="500"></MudTextField>
     </div>
-    <MudStack Spacing="1" Row>
+    <MudStack Spacing="1" Wrap="Wrap.Wrap" Row>
         
         @foreach (var sentiment in sentiments)
         {
@@ -14,14 +14,19 @@
         }
     </MudStack>
 
-    @foreach (var item in flagComments)
-    {
-        <CommentComponent Comment="item" IsAdmin/>
-    }
-
     @if (isLoading)
     {
         <LoaderComponent />
+    }
+    else
+    {
+        @foreach (var item in flagComments)
+        {
+            <CommentComponent 
+                Comment="item" 
+                IsAdmin 
+                User="item.User"/>
+        }
     }
 
 </MudStack>
@@ -29,6 +34,8 @@
 
 
 @code {
+    [Inject] private IUserService UserService { get; set; } = null!;
+
     private List<NewsFeedCommentModel> flagComments = new();
 
     private string _sentiment = string.Empty;
@@ -64,7 +71,6 @@
     public async Task Enter()
     {
         if (string.IsNullOrEmpty(_sentiment.Trim())) return;
-
       
         var results = await _sentimentService.AddSentimentAsync(new SentimentModel() { Name  = _sentiment } );
 

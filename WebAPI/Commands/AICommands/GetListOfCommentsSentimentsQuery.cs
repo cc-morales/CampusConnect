@@ -23,13 +23,37 @@ namespace WebAPI.Commands.AICommands
 
         public async Task<Result<List<NewsFeedCommentModel>>> Handle(GetListOfCommentsSentimentsQuery request, CancellationToken cancellationToken)
         {
-            var comments = await GetDBContext().NewsFeedComments.ToListAsync(cancellationToken);
+            var comments = GetDBContext().NewsFeedComments.AsQueryable();
 
-            comments = comments.Where(c => !c.IsFlagged && !c.IsDeleted).ToList();
+            var currentComments = comments.Where(c => !c.IsFlagged && !c.IsDeleted);
+
             //AI for sentiment analysis simulation
-            var sentimentsAI = await _geminiService.ModerateCommentsAsync(comments, request.Sentiments);
+            var sentimentsAI = await _geminiService.ModerateCommentsAsync(currentComments, request.Sentiments);
 
-            var results = comments.Where(c => sentimentsAI.Any(s => s == c.NewsFeedCommentId)).ToList();
+            var results = await currentComments
+                .Include(c => c.User).ThenInclude(c => c.ProfileInformation)
+                .Where(c => sentimentsAI.Any(s => s == c.NewsFeedCommentId))
+                .Select(c => new NewsFeedCommentModel
+                {
+                    NewsFeedCommentId = c.NewsFeedCommentId,
+                    NewsFeedId = c.NewsFeedId,
+                    Message = c.Message,
+                    CreatedAt = c.CreatedAt,
+                    IsFlagged = c.IsFlagged,
+                    IsDeleted = c.IsDeleted,
+                    User = new ApplicationUserModel
+                    {
+                        UserName = c.User.UserName,
+                        Email = c.User.Email,
+                        Name = c.User.Name,
+                        ProfileInformation = new ProfileInfo()
+                        {
+                            FullName = c.User.ProfileInformation.FullName,
+                            ProfilePicture = c.User.ProfileInformation.ProfilePicture,
+                        }
+                    }
+                })
+                .ToListAsync(cancellationToken);
            
             return Result.Success(results);
         }
