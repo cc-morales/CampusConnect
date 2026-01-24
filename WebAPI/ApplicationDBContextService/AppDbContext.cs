@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection.Emit;
+using System.Xml;
 
 namespace WebAPI.ApplicationDBContextService;
 public class AppDbContext : IdentityDbContext<ApplicationUserModel>
@@ -59,5 +60,9 @@ public class AppDbContext : IdentityDbContext<ApplicationUserModel>
         builder.Entity<OrganizationDepartmentModel>().ToTable("OrganizationDepartments");
         builder.Entity<LikeModel>().ToTable("Likes");
         builder.Entity<SentimentModel>().ToTable("Sentiments");
+
+
+        // Global Filter
+        builder.Entity<NewsFeedCommentModel>().HasQueryFilter(e => !e.IsDeleted);
     }
 }
