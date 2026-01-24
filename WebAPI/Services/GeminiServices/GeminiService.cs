@@ -8,7 +8,7 @@ namespace WebAPI.Services.GeminiServices
     {
         private readonly HttpClient _httpClient;
         private readonly string _apiKey;
-        private const string GeminiApiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent";
+        private string GeminiApiUrl = string.Empty;
         private readonly IConfiguration _configuration;
         public GeminiService(HttpClient httpClient, IConfiguration configuration)
         {
@@ -17,6 +17,8 @@ namespace WebAPI.Services.GeminiServices
             _configuration = configuration;
 
             _apiKey = _configuration["Gemini:APIKey"] ?? throw new InvalidOperationException("API_KEY not found.");
+
+            GeminiApiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/{_configuration["Gemini:Agent"]}:generateContent";
         }
 
         public async Task<List<Guid>> ModerateCommentsAsync(List<NewsFeedCommentModel> comments, List<string> badWords)
