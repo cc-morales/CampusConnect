@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36408.4
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11415.280 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI", "WebAPI\WebAPI.csproj", "{D61380DA-2954-417A-BA15-3BE614E64184}"
 EndProject
@@ -56,6 +56,7 @@ Global
 		{2AB699CD-7531-42E2-A9BC-33840C05615A}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{2AB699CD-7531-42E2-A9BC-33840C05615A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2AB699CD-7531-42E2-A9BC-33840C05615A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2AB699CD-7531-42E2-A9BC-33840C05615A}.Release|Any CPU.Deploy.0 = Release|Any CPU
 		{E8F3FAE1-93BB-4C97-AD5E-773E9DEA355D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E8F3FAE1-93BB-4C97-AD5E-773E9DEA355D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E8F3FAE1-93BB-4C97-AD5E-773E9DEA355D}.Release|Any CPU.ActiveCfg = Release|Any CPU

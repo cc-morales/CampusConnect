@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>c9bd63a2-384a-49b2-ac17-59248edcef74</UserSecretsId>
+	<AttachWeakETagToCompressedAssetsDuringDevelopment>true</AttachWeakETagToCompressedAssetsDuringDevelopment>
   </PropertyGroup>  
 
   <ItemGroup>

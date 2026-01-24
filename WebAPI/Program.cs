@@ -95,7 +95,7 @@ builder.Services.AddCors(options =>
     {
         policy.AllowAnyOrigin() // Blazor WASM dev URL
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod().WithExposedHeaders("ETag", "X-Pagination");
     });
 });
 
@@ -123,6 +123,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// existing mapping of controllers/endpoints
 app.MapControllers();
 
 await DbSeeder.SeedData(app);
