@@ -45,7 +45,7 @@
             <MudDrawer @bind-Open="@_open" Class="" ClipMode="DrawerClipMode.Docked" Elevation="1" Variant="@DrawerVariant.Responsive">
                 <MudNavMenu>
                     <MudNavLink Match="NavLinkMatch.All">Profile</MudNavLink>
-                    <MudNavLink Match="NavLinkMatch.All">Change Password</MudNavLink>
+                    <MudNavLink Match="NavLinkMatch.All" OnClick="ShowChangePassword">Change Password</MudNavLink>
                     <MudNavLink OnClick="Logout" Match="NavLinkMatch.All">Logout</MudNavLink>
                 </MudNavMenu>
             </MudDrawer>
@@ -112,6 +112,15 @@
         var options = new DialogOptions() { MaxWidth = MaxWidth.Small, FullWidth = true, BackdropClick = true, CloseButton = true };
         var parameters = new DialogParameters() { {"Model", request}, {"NotificationId", notificationId} };
         await _dialogService.ShowExAsync<RequestAdminDialog>(string.Empty, parameters, options);
+    }
+
+    private async Task ShowChangePassword()
+    {
+        var dialogResult = await (await _dialogService.ShowAsync<ChangePasswordDialog>("", new DialogOptions()
+        {
+            MaxWidth = MaxWidth.Medium,
+            CloseOnEscapeKey = false
+        })).Result;
     }
 }
 
