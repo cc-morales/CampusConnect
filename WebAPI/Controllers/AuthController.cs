@@ -11,7 +11,7 @@ using WebAPI.Commands.Users.Commands.LoginCommand;
 using WebAPI.Commands.Users.Queries;
 using WebAPI.Services.TokenServices;
 
-namespace MVC.WebAPI.Controllers
+namespace Camcon.WebAPI.Controllers
 {
     [Route("api/auth/")]
     [ApiController]

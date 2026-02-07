@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using MVC.WebAPI.Data;
+using Camcon.WebAPI.Data;
 using System.Text;
 using WebAPI.ApplicationDBContextService;
 using WebAPI.NotifyHub;

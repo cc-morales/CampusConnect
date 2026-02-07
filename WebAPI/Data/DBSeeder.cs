@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using WebAPI.Constants;
 
-namespace MVC.WebAPI.Data
+namespace Camcon.WebAPI.Data
 {
     public class DbSeeder
     {
