@@ -12,13 +12,9 @@ namespace Service.Services.UserServices
     public class UserService : IUserService
     {
         private readonly IConfiguration _configuration;
-
         private readonly IBaseService _baseService;
-
         private readonly string defaultRequestUrl;
-
         private RequestModel request = new();
-
         private IMemoryCache _memoryCache;
 
         public UserService(IConfiguration configuration, IBaseService baseService, IMemoryCache memoryCache)
@@ -30,10 +26,10 @@ namespace Service.Services.UserServices
         }
 
         public async Task<TokenModel> Authenticate(LoginModel model)
-        { 
+        {
             request.RequestUrl = $"{defaultRequestUrl}/login";
             request.RequestType = Enums.RequestType.POST;
-            request.Data = model.Wrap("request"); 
+            request.Data = model.Wrap("request");
 
             var response = await _baseService.SendAsync<TokenModel>(request);
 
@@ -85,7 +81,6 @@ namespace Service.Services.UserServices
                 result = await _baseService.SendAsync<ApplicationUserModel>(request);
 
                 _memoryCache.Set(cacheKey.Key, result, cacheKey.Duration);
-
             }
             catch (Exception ex)
             {
@@ -94,6 +89,17 @@ namespace Service.Services.UserServices
             }
 
             return result;
+        }
+
+        public async Task<Result> ChangePassword(ChangePasswordModel model)
+        {
+            request.RequestUrl = $"{defaultRequestUrl}/change-password";
+            request.RequestType = Enums.RequestType.POST;
+            request.Data = model.Wrap("request");
+
+            var response = await _baseService.SendAsync<Result>(request);
+
+            return response;
         }
     }
 }

@@ -9,5 +9,6 @@ namespace Service.Interfaces
         Task<List<ApplicationUserModel>> GetAllUsers();
         Task<Result> CreateUser(ApplicationUserModel userModel);
         Task<ApplicationUserModel> GetUserById(string id);
+        Task<Result> ChangePassword(ChangePasswordModel model);
     }
 }

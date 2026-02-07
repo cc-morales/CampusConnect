@@ -58,7 +58,7 @@ namespace Presentation.Shared
 
                 await _localStorage.SetItemAsync("token", uid);
 
-                ((CustomAuthenticationState)_authenticationStateProvider).NotifyUserAuthentication(uid.AccessToken);
+                await ((CustomAuthenticationState)_authenticationStateProvider).NotifyUserAuthentication(uid.AccessToken);
 
                 await _hubNotificationService.StartAdminNotificationConnection();
 
