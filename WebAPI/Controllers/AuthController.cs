@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.ApplicationDBContextService;
+using WebAPI.Commands.Users.Commands.ChangePassword;
 using WebAPI.Commands.Users.Commands.CreateCommand;
 using WebAPI.Commands.Users.Commands.LoginCommand;
 using WebAPI.Commands.Users.Queries;
@@ -145,6 +146,18 @@ namespace MVC.WebAPI.Controllers
                 return StatusCode(result.Error.Code, result.Error.Description);
 
             return Ok(result.Value);
+        }
+
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command)
+        {
+            var result = await _mediator.Send(command);
+            if (result.IsSuccess)
+                return Ok(result);
+            if (result.Error is not null)
+                return StatusCode(result.Error.Code, result.Error.Description);
+            return BadRequest();
         }
     }
 }

@@ -1,9 +1,12 @@
-﻿using Blazored.LocalStorage;
+﻿using System.Security.Claims;
+using System.Text.Json;
+using Blazored.LocalStorage;
+using Domain.Models;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
+using Service;
+using Service.Interfaces;
 using Service.Notifiers;
-using System.Security.Claims;
-using System.Text.Json;
 
 namespace Presentation.Authentication
 {
@@ -11,10 +14,14 @@ namespace Presentation.Authentication
     {
         private readonly ILocalStorageService _localStorage;
         private readonly IJSRuntime _jsRuntime;
-        public CustomAuthenticationState(ILocalStorageService localStorage, IJSRuntime jsRuntime)
+        private readonly IUserService _userService;
+        private readonly AppStateService _appStateService;
+        public CustomAuthenticationState(ILocalStorageService localStorage, IJSRuntime jsRuntime, IUserService userService, AppStateService appStateService)
         {
             _localStorage = localStorage;
             _jsRuntime = jsRuntime;
+            _userService = userService;
+            _appStateService = appStateService;
         }
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
@@ -29,11 +36,12 @@ namespace Presentation.Authentication
             }
             try
             {
-                var currentToken = await _localStorage.GetItemAsStringAsync("token");
-                if (!string.IsNullOrEmpty(currentToken))
+                var currentToken = await _localStorage.GetItemAsync<TokenModel>("token");
+
+                if (currentToken is not null)
                 {
-                    var claims = ParseClaimsFromJwt(currentToken);
-                    var expClaim = claims.FirstOrDefault(c => c.Type == "exp")?.Value;
+                    var claims = ParseClaimsFromJwt(currentToken.AccessToken);
+                    var expClaim = claims?.FirstOrDefault(c => c.Type == "exp")?.Value;
                     if (expClaim != null && long.TryParse(expClaim, out long exp))
                     {
                         var expirationTime = DateTimeOffset.FromUnixTimeSeconds(exp);
@@ -43,6 +51,8 @@ namespace Presentation.Authentication
                             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
                         }
                     }
+                    await GetAccount(currentToken.AccessToken);
+
                     var identity = new ClaimsIdentity(claims, "jwt");
 
                     return new AuthenticationState(new ClaimsPrincipal(identity));
@@ -74,9 +84,11 @@ namespace Presentation.Authentication
             }
             return Convert.FromBase64String(base64);
         }
-        public void NotifyUserAuthentication(string token)
+        public async Task NotifyUserAuthentication(string token)
         {
             var authenticatedUser = new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt"));
+
+            await GetAccount(token);
 
             var authState = Task.FromResult(new AuthenticationState(authenticatedUser));
 
@@ -87,6 +99,25 @@ namespace Presentation.Authentication
             var anonymousUser = new ClaimsPrincipal(new ClaimsIdentity());
             var authState = Task.FromResult(new AuthenticationState(anonymousUser));
             NotifyAuthenticationStateChanged(authState);
+        }
+
+        private async Task GetAccount(string token)
+        {
+            try
+            {
+                var authenticatedUser = new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt"));
+
+                var userId = authenticatedUser.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+
+                var user = await _userService.GetUserById(userId!);
+
+                _appStateService.CurrentUser = user;
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
     }
 }
