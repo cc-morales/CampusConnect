@@ -146,24 +146,29 @@
                 }
             </MudButton>
 
-            <MudButton 
-                Variant="Variant.Text" 
+            <MudButton
+                Variant="Variant.Text"
                 Class="guest-button"
                 Disabled="true"
                 FullWidth="true">
                 Continue as Guest
             </MudButton>
+
+            <MudText Typo="Typo.body2" Class="text-center" Style="color: #9E9E9E;">
+                <MudLink OnClick="ForgotPasswordClick" Class="register-link">Forgot password?</MudLink>
+            </MudText>
         </MudStack>
     </div>
 
     <MudText Typo="Typo.body2" Class="mt-8 text-center" Style="color: #757575;">
-        New to the community? 
+        New to the community?
         <MudLink OnClick="RegisterClick" Class="register-link ml-1">Create account</MudLink>
     </MudText>
 </div>
 
 @code {
     [Parameter] public EventCallback OnRegisterClick { get; set; }
+    [Parameter] public EventCallback OnForgotPasswordClick { get; set; }
     [Parameter] public EventCallback OnLogin { get; set; }
 
     protected string username = string.Empty, password = string.Empty;
@@ -172,6 +177,8 @@
     protected InputType PasswordInput = InputType.Password;
 
     private void RegisterClick() => OnRegisterClick.InvokeAsync();
+
+    private void ForgotPasswordClick() => OnForgotPasswordClick.InvokeAsync();
 
     protected void ToggleDrawer()
     {

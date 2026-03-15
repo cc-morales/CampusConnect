@@ -134,5 +134,27 @@ namespace Service.Services.UserServices
 
             return response;
         }
+
+        public async Task<Result> RequestPasswordResetAsync(string email, string baseUrl)
+        {
+            request.RequestUrl = $"{defaultRequestUrl}/request-password-reset";
+            request.RequestType = Enums.RequestType.POST;
+            request.Data = new { Email = email, BaseUrl = baseUrl };
+
+            var response = await _baseService.SendAsync<Result>(request);
+
+            return response;
+        }
+
+        public async Task<Result> ResetPasswordAsync(string guid, string newPassword, string confirmPassword)
+        {
+            request.RequestUrl = $"{defaultRequestUrl}/reset-password";
+            request.RequestType = Enums.RequestType.POST;
+            request.Data = new { Guid = guid, NewPassword = newPassword, ConfirmPassword = confirmPassword };
+
+            var response = await _baseService.SendAsync<Result>(request);
+
+            return response;
+        }
     }
 }

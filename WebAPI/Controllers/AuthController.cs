@@ -9,7 +9,9 @@ using WebAPI.Commands.Users.Commands.ChangePassword;
 using WebAPI.Commands.Users.Commands.CreateCommand;
 using WebAPI.Commands.Users.Commands.DeleteUser;
 using WebAPI.Commands.Users.Commands.LoginCommand;
+using WebAPI.Commands.Users.Commands.RequestPasswordReset;
 using WebAPI.Commands.Users.Commands.ResendCode;
+using WebAPI.Commands.Users.Commands.ResetPassword;
 using WebAPI.Commands.Users.Commands.VerifyEmail;
 using WebAPI.Commands.Users.Queries;
 using WebAPI.Services.TokenServices;
@@ -189,6 +191,26 @@ namespace Camcon.WebAPI.Controllers
         public async Task<IActionResult> DeleteUser(string id)
         {
             var result = await _mediator.Send(new DeleteUserCommand(id));
+            if (result.IsSuccess)
+                return Ok(result);
+            return StatusCode(result.Error.Code, result.Error.Description);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("request-password-reset")]
+        public async Task<IActionResult> RequestPasswordReset([FromBody] RequestPasswordResetCommand command)
+        {
+            var result = await _mediator.Send(command);
+            if (result.IsSuccess)
+                return Ok(result);
+            return StatusCode(result.Error.Code, result.Error.Description);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
+        {
+            var result = await _mediator.Send(command);
             if (result.IsSuccess)
                 return Ok(result);
             return StatusCode(result.Error.Code, result.Error.Description);

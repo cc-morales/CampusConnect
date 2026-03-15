@@ -22,6 +22,7 @@ namespace Presentation.Shared
         [Inject] protected HubNotificationService _hubNotificationService { get; set; } = default!;
 
         [Parameter] public EventCallback OnLoginSuccess { get; set; }
+        [Parameter] public EventCallback OnForgotPasswordClick { get; set; }
 
         protected string username = string.Empty, password = string.Empty;
         protected bool _open = false, isLoading = false, isShow = false;

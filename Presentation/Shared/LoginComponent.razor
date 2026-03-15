@@ -144,10 +144,10 @@
                         AdornmentAriaLabel="Show Password" />
                 </div>
 
-                <MudButton 
+                <MudButton
                     Class="login-button"
-                    Variant="Variant.Filled" 
-                    Size="Size.Large" 
+                    Variant="Variant.Filled"
+                    Size="Size.Large"
                     FullWidth="true"
                     OnClick="Login">
                     @if (isLoading)
@@ -160,9 +160,13 @@
                         <span>Sign In</span>
                     }
                 </MudButton>
+
+                <MudText Typo="Typo.body2" Class="mt-3 text-center" Style="color: #757575;">
+                    <MudLink OnClick="OnForgotPasswordClick" Style="color: #3F51B5; font-weight: 600;">Forgot Password?</MudLink>
+                </MudText>
             </MudStack>
         </MudPaper>
-        
+
         <MudText Typo="Typo.caption" Align="Align.Center" Class="d-block mt-8" Style="color: #7B1FA2;">
             &copy; @DateTime.Now.Year CampusConnect. System for Internal Administration.
         </MudText>
