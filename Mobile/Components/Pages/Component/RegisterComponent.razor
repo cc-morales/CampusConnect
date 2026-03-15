@@ -1,4 +1,5 @@
-﻿
+﻿@using Mobile.Components.Pages.Dialogs
+
 <style>
     .register-container {
         background-color: #FBF8FF;
@@ -159,7 +160,16 @@
 
             if(result.IsSuccess)
             {
-                SnackBarHelper.ShowSnackbar("Account created successfully!", Variant.Filled, _snackBar, Severity.Success);
+                SnackBarHelper.ShowSnackbar("Account created! Please verify your email.", Variant.Filled, _snackBar, Severity.Success);
+
+                // Show verification code dialog
+                var verified = await ShowVerificationDialog(User.Email);
+
+                if (verified)
+                {
+                    SnackBarHelper.ShowSnackbar("Email verified! You can now sign in.", Variant.Filled, _snackBar, Severity.Success);
+                }
+
                 Back();
             } else
             {
@@ -178,4 +188,20 @@
     }
 
     private void Back() => OnBack.InvokeAsync();
+
+    private async Task<bool> ShowVerificationDialog(string email)
+    {
+        var options = new DialogOptions
+        {
+            BackdropClick = false,
+            CloseOnEscapeKey = false,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+        var parameters = new DialogParameters { { "Email", email } };
+        var dialog = await _dialogService.ShowAsync<VerificationCodeDialog>("", parameters, options);
+        var result = await dialog.Result;
+
+        return result is not null && !result.Canceled;
+    }
 }

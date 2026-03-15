@@ -8,6 +8,8 @@ using WebAPI.ApplicationDBContextService;
 using WebAPI.Commands.Users.Commands.ChangePassword;
 using WebAPI.Commands.Users.Commands.CreateCommand;
 using WebAPI.Commands.Users.Commands.LoginCommand;
+using WebAPI.Commands.Users.Commands.ResendCode;
+using WebAPI.Commands.Users.Commands.VerifyEmail;
 using WebAPI.Commands.Users.Queries;
 using WebAPI.Services.TokenServices;
 
@@ -56,8 +58,29 @@ namespace Camcon.WebAPI.Controllers
                 return BadRequest(result.Error.Description);
             if (result.Error.Code == StatusCodes.Status401Unauthorized)
                 return Unauthorized(result.Error.Description);
+            if (result.Error.Code == StatusCodes.Status403Forbidden)
+                return StatusCode(StatusCodes.Status403Forbidden, result.Error.Description);
             return StatusCode(500, result.Error.Description);
+        }
 
+        [AllowAnonymous]
+        [HttpPost("verify-email")]
+        public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailCommand command)
+        {
+            var result = await _mediator.Send(command);
+            if (result.IsSuccess)
+                return Ok(result);
+            return StatusCode(result.Error.Code, result.Error.Description);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("resend-code")]
+        public async Task<IActionResult> ResendCode([FromBody] ResendCodeCommand command)
+        {
+            var result = await _mediator.Send(command);
+            if (result.IsSuccess)
+                return Ok(result);
+            return StatusCode(result.Error.Code, result.Error.Description);
         }
         [Authorize]
         [HttpPost("token/refresh")]

@@ -10,5 +10,7 @@ namespace Service.Interfaces
         Task<Result> CreateUser(ApplicationUserModel userModel);
         Task<ApplicationUserModel> GetUserById(string id);
         Task<Result> ChangePassword(ChangePasswordModel model);
+        Task<Result> VerifyEmailAsync(string email, string code);
+        Task<Result> ResendVerificationCodeAsync(string email);
     }
 }

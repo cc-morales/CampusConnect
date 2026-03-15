@@ -101,5 +101,27 @@ namespace Service.Services.UserServices
 
             return response;
         }
+
+        public async Task<Result> VerifyEmailAsync(string email, string code)
+        {
+            request.RequestUrl = $"{defaultRequestUrl}/verify-email";
+            request.RequestType = Enums.RequestType.POST;
+            request.Data = new { Email = email, Code = code };
+
+            var response = await _baseService.SendAsync<Result>(request);
+
+            return response;
+        }
+
+        public async Task<Result> ResendVerificationCodeAsync(string email)
+        {
+            request.RequestUrl = $"{defaultRequestUrl}/resend-code";
+            request.RequestType = Enums.RequestType.POST;
+            request.Data = new { Email = email };
+
+            var response = await _baseService.SendAsync<Result>(request);
+
+            return response;
+        }
     }
 }

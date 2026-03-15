@@ -7,6 +7,7 @@ using System.Security.Claims;
 using WebAPI.ApplicationDBContextService;
 using WebAPI.Constants;
 using WebAPI.Interfaces;
+using WebAPI.Services.EmailService;
 using WebAPI.Services.TokenServices;
 
 namespace WebAPI.Commands.Users.Commands.LoginCommand
@@ -16,16 +17,22 @@ namespace WebAPI.Commands.Users.Commands.LoginCommand
         private readonly UserManager<ApplicationUserModel> _userManager;
         private readonly ILogger<UserLoginCommandHandler> _logger;
         private readonly ITokenService _tokenService;
+        private readonly VerificationCodeService _verificationCodeService;
+        private readonly IEmailService _emailService;
 
         public UserLoginCommandHandler(
             AppDbContext context, 
             UserManager<ApplicationUserModel> userManager,
             ILogger<UserLoginCommandHandler> logger,
-            ITokenService tokenService) : base(context)
+            ITokenService tokenService,
+            VerificationCodeService verificationCodeService,
+            IEmailService emailService) : base(context)
         {
             _userManager = userManager;
             _logger = logger;
             _tokenService = tokenService;
+            _verificationCodeService = verificationCodeService;
+            _emailService = emailService;
         }
 
         public async Task<Result<TokenModel>> Handle(UserLoginCommand command, CancellationToken cancellationToken)
@@ -41,6 +48,20 @@ namespace WebAPI.Commands.Users.Commands.LoginCommand
                 if (isValidPassword == false)
                 {
                     return Result.Failure<TokenModel>(UserErrors.Unauthorized());
+                }
+
+                // Check if email is verified (only for User role, not Admin)
+                var roles = await _userManager.GetRolesAsync(user);
+                if (!user.EmailConfirmed && roles.Contains(Roles.User))
+                {
+                    // Resend verification code if no pending code exists
+                    if (!_verificationCodeService.HasPendingCode(user.Email!))
+                    {
+                        var code = _verificationCodeService.GenerateAndStore(user.Email!);
+                        await _emailService.SendVerificationCodeAsync(user.Email!, code);
+                    }
+
+                    return Result.Failure<TokenModel>(UserErrors.EmailNotConfirmed());
                 }
 
                 // creating the necessary claims

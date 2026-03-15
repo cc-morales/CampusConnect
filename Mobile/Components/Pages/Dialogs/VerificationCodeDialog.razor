@@ -1,0 +1,204 @@
+﻿
+<style>
+    .code-container {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin: 24px 0;
+    }
+
+    .code-box {
+        width: 48px;
+        height: 56px;
+        border-radius: 12px;
+        border: 2px solid #E1BEE7;
+        background: #F8F7FA;
+        font-size: 24px;
+        font-weight: 700;
+        text-align: center;
+        color: #3F51B5;
+        outline: none;
+        transition: border-color 0.2s ease;
+    }
+
+    .code-box:focus {
+        border-color: #9C27B0;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(156, 39, 176, 0.1);
+    }
+</style>
+
+<MudDialog>
+    <TitleContent>
+        <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+            <MudIcon Icon="@Icons.Material.Filled.MarkEmailRead" Color="Color.Primary" />
+            <MudText Typo="Typo.h6">Email Verification</MudText>
+        </MudStack>
+    </TitleContent>
+    <DialogContent>
+        <MudStack AlignItems="AlignItems.Center" Spacing="2">
+            <MudText Typo="Typo.body2" Align="Align.Center" Style="color: #666;">
+                We sent a 6-digit verification code to
+            </MudText>
+            <MudText Typo="Typo.subtitle2" Align="Align.Center" Color="Color.Primary">
+                @Email
+            </MudText>
+
+            <div class="code-container">
+                @for (int i = 0; i < 6; i++)
+                {
+                    var index = i;
+                    <input class="code-box"
+                           type="text"
+                           maxlength="1"
+                           inputmode="numeric"
+                           value="@_codeDigits[index]"
+                           @oninput="(e) => OnDigitInput(index, e)"
+                           @onkeydown="(e) => OnDigitKeyDown(index, e)"
+                           @ref="_inputRefs[index]" />
+                }
+            </div>
+
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <MudAlert Severity="Severity.Error" Dense Class="mt-1">@_errorMessage</MudAlert>
+            }
+
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Primary"
+                       Size="Size.Small"
+                       OnClick="ResendCode"
+                       Disabled="_isResending"
+                       Class="mt-2">
+                @if (_isResending)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate Class="mr-1" />
+                }
+                Resend Code
+            </MudButton>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Variant="Variant.Text">Cancel</MudButton>
+        <MudButton Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   OnClick="Verify"
+                   Disabled="_isVerifying"
+                   Style="border-radius: 12px;">
+            @if (_isVerifying)
+            {
+                <MudProgressCircular Size="Size.Small" Color="Color.Inherit" Indeterminate Class="mr-2" />
+            }
+            Verify
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public string Email { get; set; } = string.Empty;
+
+    private string[] _codeDigits = new string[6];
+    private ElementReference[] _inputRefs = new ElementReference[6];
+    private string _errorMessage = string.Empty;
+    private bool _isVerifying;
+    private bool _isResending;
+
+    private async Task OnDigitInput(int index, ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString() ?? string.Empty;
+
+        // Handle paste of full code
+        if (value.Length >= 6)
+        {
+            var digits = new string(value.Where(char.IsDigit).Take(6).ToArray());
+            for (int i = 0; i < Math.Min(digits.Length, 6); i++)
+                _codeDigits[i] = digits[i].ToString();
+            if (digits.Length == 6)
+                await _inputRefs[5].FocusAsync();
+            return;
+        }
+
+        // Single digit
+        var digit = new string(value.Where(char.IsDigit).Take(1).ToArray());
+        _codeDigits[index] = digit;
+
+        if (!string.IsNullOrEmpty(digit) && index < 5)
+            await _inputRefs[index + 1].FocusAsync();
+    }
+
+    private async Task OnDigitKeyDown(int index, KeyboardEventArgs e)
+    {
+        if (e.Key == "Backspace" && string.IsNullOrEmpty(_codeDigits[index]) && index > 0)
+        {
+            _codeDigits[index - 1] = string.Empty;
+            await _inputRefs[index - 1].FocusAsync();
+        }
+        else if (e.Key == "Enter")
+        {
+            await Verify();
+        }
+    }
+
+    private async Task Verify()
+    {
+        _errorMessage = string.Empty;
+        var code = string.Join("", _codeDigits);
+
+        if (code.Length < 6 || !code.All(char.IsDigit))
+        {
+            _errorMessage = "Please enter all 6 digits";
+            return;
+        }
+
+        _isVerifying = true;
+
+        try
+        {
+            var result = await _userService.VerifyEmailAsync(Email, code);
+
+            if (result.IsSuccess)
+            {
+                _snackBar.Add("Email verified successfully!", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            else
+            {
+                _errorMessage = "Invalid or expired verification code";
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message.Contains("Invalid") ? "Invalid or expired verification code" : ex.Message;
+        }
+        finally
+        {
+            _isVerifying = false;
+        }
+    }
+
+    private async Task ResendCode()
+    {
+        _isResending = true;
+        _errorMessage = string.Empty;
+
+        try
+        {
+            await _userService.ResendVerificationCodeAsync(Email);
+            _snackBar.Add("Verification code resent!", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isResending = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}
+

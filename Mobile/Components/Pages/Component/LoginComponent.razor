@@ -1,4 +1,6 @@
 ﻿
+@using Mobile.Components.Pages.Dialogs
+
 <style>
     @@keyframes fadeInUp {
         from {
@@ -216,7 +218,19 @@
         }
         catch (Exception ex)
         {
-            if (ex.Message.ToLower().Contains("invalid"))
+            if (ex.Message.Contains("email_not_confirmed"))
+            {
+                // Show verification dialog — user needs to verify email
+                var verified = await ShowVerificationDialog(username);
+                if (verified)
+                {
+                    SnackBarHelper.ShowSnackbar("Email verified! Signing in...", Variant.Filled, _snackBar, Severity.Success);
+                    // Retry login after successful verification
+                    await Login();
+                    return;
+                }
+            }
+            else if (ex.Message.ToLower().Contains("invalid"))
                 SnackBarHelper.ShowSnackbar("Invalid email or password", Variant.Filled, _snackBar, Severity.Error);
             else
                 SnackBarHelper.ShowSnackbar(ex.Message, Variant.Filled, _snackBar, Severity.Error);
@@ -241,5 +255,21 @@
             PasswordInput = InputType.Text;
         }
     }
-    
+
+    private async Task<bool> ShowVerificationDialog(string email)
+    {
+        var options = new DialogOptions
+        {
+            BackdropClick = false,
+            CloseOnEscapeKey = false,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+        var parameters = new DialogParameters { { "Email", email } };
+        var dialog = await _dialogService.ShowAsync<VerificationCodeDialog>("", parameters, options);
+        var result = await dialog.Result;
+
+        return result is not null && !result.Canceled;
+    }
+
 }
