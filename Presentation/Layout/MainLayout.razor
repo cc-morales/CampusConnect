@@ -18,7 +18,9 @@
         <MudLayout>
             <MudAppBar Elevation="1" Dense>
                 <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
-                <MudText Typo="Typo.h6" Class="mr-4" Style="color:white;">Campus Connect</MudText>
+                <MudLink Href="/" Underline="Underline.None" Style="color:white;">
+                    <MudText Typo="Typo.h6" Class="mr-4">Campus Connect</MudText>
+                </MudLink>
                 <MudSpacer />
                 <MudMenu ListClass="notify-container">
                     <ActivatorContent>
@@ -44,9 +46,9 @@
             </MudAppBar>
             <MudDrawer @bind-Open="@_open" Class="" ClipMode="DrawerClipMode.Docked" Elevation="1" Variant="@DrawerVariant.Responsive">
                 <MudNavMenu>
-                    <MudNavLink Match="NavLinkMatch.All">Profile</MudNavLink>
-                    <MudNavLink Match="NavLinkMatch.All" OnClick="ShowChangePassword">Change Password</MudNavLink>
-                    <MudNavLink OnClick="Logout" Match="NavLinkMatch.All">Logout</MudNavLink>
+                    <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+                    <MudNavLink Match="NavLinkMatch.All" OnClick="ShowChangePassword" Icon="@Icons.Material.Filled.Lock">Change Password</MudNavLink>
+                    <MudNavLink OnClick="Logout" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Logout">Logout</MudNavLink>
                 </MudNavMenu>
             </MudDrawer>
             <MudMainContent>

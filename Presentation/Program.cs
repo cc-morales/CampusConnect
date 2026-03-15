@@ -12,6 +12,7 @@ using Service.Notifiers;
 using Service.Services.BaseService;
 using Service.Services.CommentServices;
 using Service.Services.DepartmentServices;
+using Service.Services.NewsFeedServices;
 using Service.Services.NotificationServices;
 using Service.Services.OrganizationServices;
 using Service.Services.PageRequestServices;
@@ -46,6 +47,7 @@ builder.Services.AddScoped<IGeminiService, GeminiService>();
 builder.Services.AddScoped<ISentimentService, SentimentService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<INewsFeedService, NewsFeedService>();
 
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationState>();
 

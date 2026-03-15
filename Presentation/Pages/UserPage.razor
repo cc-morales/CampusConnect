@@ -13,7 +13,7 @@
         <MudText Typo="Typo.h6">Organizations/Departments</MudText>
         <MudSpacer />
         <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-        <MudIconButton OnClick="() => OpenDialog(Enums.Action.Create, new())" Icon="@Icons.Material.Filled.Add"></MudIconButton>
+        <MudIconButton OnClick="() => OpenDialog(Enums.Action.Create, new ApplicationUserModel())" Icon="@Icons.Material.Filled.Add"></MudIconButton>
     </ToolBarContent>
     <HeaderContent>
         <MudTh>Id</MudTh>
@@ -69,7 +69,7 @@
         parameters.Add("Action", action);
         parameters.Add("Model", org);
 
-        var dialog = await _dialogService.ShowAsync<CreateOrganizationDialog>(string.Empty, parameters);
+        var dialog = await _dialogService.ShowAsync<EditUserDialog>(string.Empty, parameters);
 
         var result = await dialog.Result;
 

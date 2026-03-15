@@ -1,4 +1,6 @@
-﻿using Blazored.LocalStorage;
+﻿using System.Security.Claims;
+using System.Text.Json;
+using Blazored.LocalStorage;
 using Domain.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -55,6 +57,15 @@ namespace Presentation.Shared
                     Username = username,
                     Password = password
                 });
+                
+                var claims = ParseClaimsFromJwt(uid.AccessToken);
+                var roleClaim = claims?.FirstOrDefault(c =>
+                    c.Type is "role" or "http://schemas.microsoft.com/ws/2008/06/identity/claims/role");
+                if (roleClaim == null || !roleClaim.Value.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+                {
+                    SnackBarHelper.ShowSnackbar("Access denied. Only administrators are allowed to login.", Variant.Filled, _snackBar, Severity.Error);
+                    return;
+                }
 
                 await _localStorage.SetItemAsync("token", uid);
 
@@ -93,6 +104,24 @@ namespace Presentation.Shared
                 PasswordInputIcon = Icons.Material.Filled.Visibility;
                 PasswordInput = InputType.Text;
             }
+        }
+
+        private IEnumerable<Claim>? ParseClaimsFromJwt(string jwt)
+        {
+            var payload = jwt.Split('.')[1];
+            var jsonBytes = ParseBase64WithoutPadding(payload);
+            var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
+            return keyValuePairs?.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString()!));
+        }
+
+        private static byte[] ParseBase64WithoutPadding(string base64)
+        {
+            switch (base64.Length % 4)
+            {
+                case 2: base64 += "=="; break;
+                case 3: base64 += "="; break;
+            }
+            return Convert.FromBase64String(base64);
         }
     }
 }

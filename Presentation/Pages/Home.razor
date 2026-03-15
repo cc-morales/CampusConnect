@@ -53,7 +53,7 @@
                 <ActionComponent Title="Organizations" Description="Manage departments, student groups, and institutional hierarchy." OnClick="OpenOrg" IsCreate></ActionComponent>
             </MudItem>
             <MudItem xs="12" sm="6" md="4">
-                <ActionComponent Title="Live Newsfeed" Description="Monitor real-time activity and broadcast global announcements." OnClick="(s) => Navigate(s, true)"></ActionComponent>
+                <ActionComponent Title="Live Newsfeed" Description="Monitor real-time activity and broadcast global announcements." Redirect="livenewsfeed" OnClick="(s) => Navigate(s, true)"></ActionComponent>
             </MudItem>
             <MudItem xs="12" sm="6" md="4">
                 <ActionComponent Title="Sentiment Lab" Description="Advanced AI-driven analytics of community mood and feedback." Redirect="Sentiments" OnClick="(s) => Navigate(s, true)"></ActionComponent>

@@ -19,6 +19,7 @@
 @using Domain.Models
 @using Domain
 @using Presentation.Shared.Dialogs
+@using Service
 @using Service.Interfaces
 @using Service.Notifiers
 
@@ -33,6 +34,7 @@
 @inject IDialogService _dialogService
 @inject ILocalStorageService _localStorage
 @inject ISnackbar _snackBar
+@inject AppStateService _appStateService
 
 @inject IDialogService _dialogService
 @inject IUserService _userService
@@ -42,3 +44,7 @@
 @inject IPageRequestService _pageRequestService
 @inject IGeminiService _geminiService
 @inject ISentimentService _sentimentService
+@inject INewsFeedService _newsFeedService
+@inject ICommentService _commentService
+@inject INewsFeedService _newsFeedService
+@inject ICommentService _commentService

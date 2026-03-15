@@ -1,0 +1,39 @@
+﻿<MudDialog>
+    <TitleContent>
+        @(Action == Enums.Action.Create ? "Create User" : "Edit User")
+    </TitleContent>
+    <DialogContent>
+        <MudStack Class="gap-2">
+            <MudTextField @bind-Value="Model.Name" Label="Name" Variant="Variant.Outlined" ShrinkLabel />
+            <MudTextField @bind-Value="Model.Email" Label="Email" Variant="Variant.Outlined" ShrinkLabel />
+            @if (Action == Enums.Action.Create)
+            {
+                <MudTextField @bind-Value="Model.Password" Label="Password" Variant="Variant.Outlined" ShrinkLabel InputType="InputType.Password" />
+            }
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit" Variant="Variant.Filled">Save</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public ApplicationUserModel Model { get; set; } = new();
+
+    [Parameter] public Enums.Action Action { get; set; }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task Submit()
+    {
+        if (Action == Enums.Action.Create)
+            await _userService.CreateUser(Model);
+
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+}
+
