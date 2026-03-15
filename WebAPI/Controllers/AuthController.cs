@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using WebAPI.ApplicationDBContextService;
 using WebAPI.Commands.Users.Commands.ChangePassword;
 using WebAPI.Commands.Users.Commands.CreateCommand;
+using WebAPI.Commands.Users.Commands.DeleteUser;
 using WebAPI.Commands.Users.Commands.LoginCommand;
 using WebAPI.Commands.Users.Commands.ResendCode;
 using WebAPI.Commands.Users.Commands.VerifyEmail;
@@ -181,6 +182,16 @@ namespace Camcon.WebAPI.Controllers
             if (result.Error is not null)
                 return StatusCode(result.Error.Code, result.Error.Description);
             return BadRequest();
+        }
+
+        [Authorize]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(string id)
+        {
+            var result = await _mediator.Send(new DeleteUserCommand(id));
+            if (result.IsSuccess)
+                return Ok(result);
+            return StatusCode(result.Error.Code, result.Error.Description);
         }
     }
 }

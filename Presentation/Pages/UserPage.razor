@@ -12,7 +12,7 @@
                 <col style="width: 1%;" />
             </ColGroup>
             <ToolBarContent>
-                <MudText Typo="Typo.h6">Organizations/Departments</MudText>
+                <MudText Typo="Typo.h6">Users</MudText>
                 <MudSpacer />
                 <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                 <MudIconButton OnClick="() => OpenDialog(Enums.Action.Create, new ApplicationUserModel())" Icon="@Icons.Material.Filled.Add"></MudIconButton>
@@ -30,7 +30,7 @@
                 <MudTd>
                     <MudMenu Icon="@Icons.Material.Filled.MoreVert" AnchorOrigin="Origin.TopLeft" TransformOrigin="Origin.TopRight" Dense>
                         <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="() => OpenDialog(Enums.Action.Delete, row)" Label="Edit" />
-                        <MudMenuItem Icon="@Icons.Material.Filled.Delete" Label="Delete" />
+                        @* <MudMenuItem Icon="@Icons.Material.Filled.Delete" OnClick="() => DeleteUser(row)" Label="Delete" /> *@
                     </MudMenu>
                 </MudTd>
             </RowTemplate>
@@ -85,5 +85,30 @@
             {
                 await OnInitializedAsync();
             }
+    }
+
+    private async Task DeleteUser(ApplicationUserModel user)
+    {
+        var parameters = new DialogParameters
+        {
+            { "Description", $"Are you sure you want to delete \"{user.Name}\"? This will also remove their organizations and all related data. This action cannot be undone." }
+        };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall, FullWidth = true };
+        var dialog = await _dialogService.ShowAsync<ConfirmDialog>("Delete User", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+        {
+            try
+            {
+                await _userService.DeleteUserAsync(user.Id);
+                _snackBar.Add($"User \"{user.Name}\" deleted successfully", Severity.Success);
+                await OnInitializedAsync();
+            }
+            catch (Exception ex)
+            {
+                _snackBar.Add(ex.Message, Severity.Error);
+            }
+        }
     }
 }

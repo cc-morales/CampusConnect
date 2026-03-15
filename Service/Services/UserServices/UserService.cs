@@ -123,5 +123,16 @@ namespace Service.Services.UserServices
 
             return response;
         }
+
+        public async Task<Result> DeleteUserAsync(string userId)
+        {
+            request.RequestUrl = $"{defaultRequestUrl}/{userId}";
+            request.RequestType = Enums.RequestType.DELETE;
+            request.Data = null;
+
+            var response = await _baseService.SendAsync<Result>(request);
+
+            return response;
+        }
     }
 }

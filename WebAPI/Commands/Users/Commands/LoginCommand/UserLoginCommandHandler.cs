@@ -52,16 +52,17 @@ namespace WebAPI.Commands.Users.Commands.LoginCommand
 
                 // Check if email is verified (only for User role, not Admin)
                 var roles = await _userManager.GetRolesAsync(user);
-                if (!user.EmailConfirmed && roles.Contains(Roles.User))
+                if (roles.Contains(Roles.User))
                 {
-                    // Resend verification code if no pending code exists
-                    if (!_verificationCodeService.HasPendingCode(user.Email!))
+                    // Resend verification code if no pending code exists or email not confirmed
+                    if (_verificationCodeService.HasPendingCode(user.Email!) || !user.EmailConfirmed)
                     {
                         var code = _verificationCodeService.GenerateAndStore(user.Email!);
                         await _emailService.SendVerificationCodeAsync(user.Email!, code);
-                    }
+                        
+                        return Result.Failure<TokenModel>(UserErrors.EmailNotConfirmed());
 
-                    return Result.Failure<TokenModel>(UserErrors.EmailNotConfirmed());
+                    }
                 }
 
                 // creating the necessary claims
