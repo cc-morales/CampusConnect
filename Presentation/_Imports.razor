@@ -18,6 +18,7 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using Domain.Models
 @using Domain
+@using Domain.Constants
 @using Presentation.Shared.Dialogs
 @using Service
 @using Service.Interfaces
@@ -46,5 +47,4 @@
 @inject ISentimentService _sentimentService
 @inject INewsFeedService _newsFeedService
 @inject ICommentService _commentService
-@inject INewsFeedService _newsFeedService
-@inject ICommentService _commentService
+@inject IAdminService _adminService

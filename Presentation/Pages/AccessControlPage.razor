@@ -1,0 +1,136 @@
+﻿@page "/access-control"
+
+<AuthorizeView Policy="@AdminPermissions.AccessControl">
+    <Authorized>
+        <PageTitle>Access Control | CampusConnect</PageTitle>
+
+        <MudTable Class="standard-table mt-1"
+                  Items="_adminList"
+                  Hover Bordered Striped FixedFooter Dense
+                  Loading="_isLoading"
+                  Filter="new Func<AdminAccountModel, bool>(FilterFunction)">
+            <ColGroup>
+                <col style="width: 20%;" />
+                <col style="width: 20%;" />
+                <col />
+                <col style="width: 1%;" />
+            </ColGroup>
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Admin Accounts</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="_searchString"
+                              Placeholder="Search"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              IconSize="Size.Medium"
+                              Class="mt-0" />
+                <MudIconButton OnClick="OpenCreateDialog"
+                               Icon="@Icons.Material.Filled.PersonAdd"
+                               Color="Color.Primary" />
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh>Email</MudTh>
+                <MudTh>Permissions</MudTh>
+                <MudTh>Action</MudTh>
+            </HeaderContent>
+            <RowTemplate Context="row">
+                <MudTd DataLabel="Name">@row.Name</MudTd>
+                <MudTd DataLabel="Email">@row.Email</MudTd>
+                <MudTd DataLabel="Permissions">
+                    <MudStack Row Wrap="Wrap.Wrap" Spacing="1">
+                        @if (row.AccessControl is { Length: > 0 })
+                        {
+                            @foreach (var perm in row.AccessControl)
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined">@perm</MudChip>
+                            }
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.caption" Color="Color.Warning">No permissions</MudText>
+                        }
+                    </MudStack>
+                </MudTd>
+                <MudTd>
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert"
+                             AnchorOrigin="Origin.TopLeft"
+                             TransformOrigin="Origin.TopRight" Dense>
+                        <MudMenuItem Icon="@Icons.Material.Filled.Security"
+                                     OnClick="() => OpenEditAccessDialog(row)"
+                                     Label="Edit Access" />
+                    </MudMenu>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    </Authorized>
+    <NotAuthorized>
+        <MudAlert Severity="Severity.Error" Class="ma-4">
+            You do not have permission to access this page.
+        </MudAlert>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private List<AdminAccountModel> _adminList = new();
+    private string _searchString = string.Empty;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAdmins();
+    }
+
+    private async Task LoadAdmins()
+    {
+        _isLoading = true;
+
+        try
+        {
+            _adminList = await _adminService.GetAllAdminsAsync();
+        }
+        catch (Exception ex)
+        {
+            _snackBar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private bool FilterFunction(AdminAccountModel element)
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+        if (element.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Email.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private async Task OpenCreateDialog()
+    {
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await _dialogService.ShowAsync<CreateAdminDialog>("Create Admin", options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+            await LoadAdmins();
+    }
+
+    private async Task OpenEditAccessDialog(AdminAccountModel admin)
+    {
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var parameters = new DialogParameters { { "Model", admin } };
+        var dialog = await _dialogService.ShowAsync<EditAccessDialog>(string.Empty, parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+            await LoadAdmins();
+    }
+}

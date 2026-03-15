@@ -1,44 +1,51 @@
 ﻿@page "/organizations"
 
-<PageTitle>CamCon | Organization</PageTitle>
+<AuthorizeView Policy="@AdminPermissions.Organizations">
+    <Authorized>
+        <PageTitle>CamCon | Organization</PageTitle>
 
-<MudTable Class="standard-table mt-1" Items="MyOrganizationList" Hover Bordered Striped FixedFooter Dense Filter="new Func<MyOrganizationModel, bool>(FilterFunction)">
-    <ColGroup>
-        <col style="width: 30%;"/>
-        <col/>
-        <col />
-        <col />
-        <col style="width: 1%;"/>
-    </ColGroup>
-    <ToolBarContent>
-        <MudText Typo="Typo.h6">Organizations/Departments</MudText>
-        <MudSpacer />
-        <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-        <MudIconButton OnClick="() => OpenDialog(Enums.Action.Create, new())" Icon="@Icons.Material.Filled.Add"></MudIconButton>
-    </ToolBarContent>
-    <HeaderContent>
-        <MudTh>Id</MudTh>
-        <MudTh>Name</MudTh>
-        <MudTh>Type</MudTh>
-        <MudTh>User</MudTh>
-        <MudTh>Action</MudTh>
-    </HeaderContent>
-    <RowTemplate>
-        <MudTd DataLabel="Nr">@context.MyOrganizationId</MudTd>
-        <MudTd DataLabel="Sign">@context.OrganizationName</MudTd>
-        <MudTd DataLabel="Sign">@context.OrganizationType</MudTd>
-        <MudTd DataLabel="Sign">@context.User?.Name</MudTd>
-        <MudTd>
-            <MudMenu Icon="@Icons.Material.Filled.MoreVert" AnchorOrigin="Origin.TopLeft" TransformOrigin="Origin.TopRight" Dense>
-                <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="() => OpenDialog(Enums.Action.Delete, context)" Label="Edit" />
-                <MudMenuItem Icon="@Icons.Material.Filled.Delete" Label="Delete" />
-            </MudMenu>
-        </MudTd>
-    </RowTemplate>
-    <PagerContent>
-        <MudTablePager/>
-    </PagerContent>
-</MudTable>
+        <MudTable Class="standard-table mt-1" Items="MyOrganizationList" Hover Bordered Striped FixedFooter Dense Filter="new Func<MyOrganizationModel, bool>(FilterFunction)">
+            <ColGroup>
+                <col style="width: 30%;"/>
+                <col/>
+                <col />
+                <col />
+                <col style="width: 1%;"/>
+            </ColGroup>
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Organizations/Departments</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                <MudIconButton OnClick="() => OpenDialog(Enums.Action.Create, new())" Icon="@Icons.Material.Filled.Add"></MudIconButton>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>Id</MudTh>
+                <MudTh>Name</MudTh>
+                <MudTh>Type</MudTh>
+                <MudTh>User</MudTh>
+                <MudTh>Action</MudTh>
+            </HeaderContent>
+            <RowTemplate Context="row">
+                <MudTd DataLabel="Nr">@row.MyOrganizationId</MudTd>
+                <MudTd DataLabel="Sign">@row.OrganizationName</MudTd>
+                <MudTd DataLabel="Sign">@row.OrganizationType</MudTd>
+                <MudTd DataLabel="Sign">@row.User?.Name</MudTd>
+                <MudTd>
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" AnchorOrigin="Origin.TopLeft" TransformOrigin="Origin.TopRight" Dense>
+                        <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="() => OpenDialog(Enums.Action.Delete, row)" Label="Edit" />
+                        <MudMenuItem Icon="@Icons.Material.Filled.Delete" Label="Delete" />
+                    </MudMenu>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager/>
+            </PagerContent>
+        </MudTable>
+    </Authorized>
+    <NotAuthorized>
+        <MudAlert Severity="Severity.Error" Class="ma-4">You do not have permission to access this page.</MudAlert>
+    </NotAuthorized>
+</AuthorizeView>
 
 
 @code {

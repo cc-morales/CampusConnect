@@ -1,35 +1,42 @@
 ﻿@page "/sentiments"
 
-<PageTitle>Sentiment</PageTitle>
-<MudStack Class="position-relative pa-2" Spacing="1"  Style="height: calc(100vh - 120px); overflow-y: auto;">
-    <div>
-        <MudTextField @bind-Value="_sentiment" Variant="Variant.Outlined" Label="Sentiment" ShrinkLabel AdornmentIcon="@Icons.Material.Filled.Add"
-                      Adornment="Adornment.End" OnAdornmentClick="Enter" DebounceInterval="500"></MudTextField>
-    </div>
-    <MudStack Spacing="1" Wrap="Wrap.Wrap" Row>
-        
-        @foreach (var sentiment in sentiments)
-        {
-            <MudChip T="string" Color="Color.Primary" Size="Size.Medium" Variant="Variant.Outlined" OnClose="() => RemoveSentiment(sentiment)">@sentiment.Name</MudChip>
-        }
-    </MudStack>
+<AuthorizeView Policy="@AdminPermissions.Sentiments">
+    <Authorized>
+        <PageTitle>Sentiment</PageTitle>
+        <MudStack Class="position-relative pa-2" Spacing="1"  Style="height: calc(100vh - 120px); overflow-y: auto;">
+            <div>
+                <MudTextField @bind-Value="_sentiment" Variant="Variant.Outlined" Label="Sentiment" ShrinkLabel AdornmentIcon="@Icons.Material.Filled.Add"
+                              Adornment="Adornment.End" OnAdornmentClick="Enter" DebounceInterval="500"></MudTextField>
+            </div>
+            <MudStack Spacing="1" Wrap="Wrap.Wrap" Row>
+                
+                @foreach (var sentiment in sentiments)
+                {
+                    <MudChip T="string" Color="Color.Primary" Size="Size.Medium" Variant="Variant.Outlined" OnClose="() => RemoveSentiment(sentiment)">@sentiment.Name</MudChip>
+                }
+            </MudStack>
 
-    @if (isLoading)
-    {
-        <LoaderComponent />
-    }
-    else
-    {
-        @foreach (var item in flagComments)
-        {
-            <CommentComponent 
-                Comment="item" 
-                IsAdmin 
-                User="item.User"/>
-        }
-    }
+            @if (isLoading)
+            {
+                <LoaderComponent />
+            }
+            else
+            {
+                @foreach (var item in flagComments)
+                {
+                    <CommentComponent 
+                        Comment="item" 
+                        IsAdmin 
+                        User="item.User"/>
+                }
+            }
 
-</MudStack>
+        </MudStack>
+    </Authorized>
+    <NotAuthorized>
+        <MudAlert Severity="Severity.Error" Class="ma-4">You do not have permission to access this page.</MudAlert>
+    </NotAuthorized>
+</AuthorizeView>
 
 
 

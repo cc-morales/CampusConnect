@@ -59,6 +59,12 @@ namespace WebAPI.Commands.Users.Commands.LoginCommand
                     authClaims.Add(new Claim(ClaimTypes.Role, userRole));
                 }
 
+                // Add access control permissions claim for admin users
+                if (!string.IsNullOrEmpty(user.AccessControl))
+                {
+                    authClaims.Add(new Claim("access", user.AccessControl));
+                }
+
                 //generate access token
                 var token = _tokenService.GenerateAccessToken(authClaims);
                 //generate refresh token
