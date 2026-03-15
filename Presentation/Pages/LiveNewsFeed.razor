@@ -1,0 +1,101 @@
+@page "/livenewsfeed"
+
+@implements IFeedNotifier
+
+<AuthorizeView Policy="@AdminPermissions.LiveNewsFeed">
+    <Authorized>
+        <PageTitle>Live News Feed | CampusConnect</PageTitle>
+
+        <style>
+            .newsfeed-wrapper {
+                background-color: #FBFBFE;
+                min-height: 100vh;
+                padding: 20px;
+                font-family: 'Inter', sans-serif;
+            }
+
+            .header-section {
+                margin-bottom: 32px;
+                border-left: 4px solid #3F51B5;
+                padding-left: 24px;
+            }
+
+            .main-title {
+                font-weight: 800;
+                font-size: 2.5rem;
+                background: linear-gradient(135deg, #3F51B5 0%, #9C27B0 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                letter-spacing: -1.5px;
+                line-height: 1.1;
+            }
+
+            .sub-title {
+                font-weight: 600;
+                font-size: 1rem;
+                color: #6C757D;
+                margin-top: 4px;
+                letter-spacing: 0.5px;
+            }
+
+            .feed-container {
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+        </style>
+
+        <div class="newsfeed-wrapper">
+            <div class="header-section">
+                <div class="main-title">Live News Feed</div>
+                <div class="sub-title">Real-time campus activity and announcements</div>
+            </div>
+
+            <div class="feed-container">
+                <MudStack Spacing="0">
+                    <Header OrganizationList="OrganizationList" Notifier="this"></Header>
+                    <NewsFeeds MyOrganization="CurrentOrganization">
+                        <ProfileContent>
+                            <OrganizationView Organizaton="CurrentOrganization" AppStateService="_appStateService"></OrganizationView>
+                        </ProfileContent>
+                        <NewsFeedContent>
+                            <NewsFeedPosts @ref="PostComponentRef" OrganiationId="@CurrentOrganization?.MyOrganizationId" NewsFeedService="_newsFeedService"></NewsFeedPosts>
+                        </NewsFeedContent>
+                    </NewsFeeds>
+                </MudStack>
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <MudAlert Severity="Severity.Error" Class="ma-4">You do not have permission to access this page.</MudAlert>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    List<MyOrganizationModel> OrganizationList = new();
+
+    private MyOrganizationModel? CurrentOrganization;
+    private List<NewsFeedModel> CurrentNewsFeeds = new();
+    private NewsFeedPosts PostComponentRef = null!;
+
+    public async Task OnOrganizationClick(Guid guid)
+    {
+        if(guid.Equals(new Guid()))
+        {
+            CurrentOrganization = null;
+            PostComponentRef.filterPostsByOrganization(null, true);
+        } 
+        else
+        {
+            CurrentOrganization = OrganizationList.FirstOrDefault(x => x.MyOrganizationId == guid);
+            PostComponentRef.filterPostsByOrganization(CurrentOrganization?.MyOrganizationId);
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        OrganizationList = await _organizationService.GetAllOrganizationsAsync();
+        StateHasChanged();
+    }
+}

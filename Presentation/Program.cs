@@ -1,4 +1,5 @@
 using Blazored.LocalStorage;
+using Domain.Constants;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -9,9 +10,11 @@ using Presentation.Authentication;
 using Service;
 using Service.Interfaces;
 using Service.Notifiers;
+using Service.Services.AdminServices;
 using Service.Services.BaseService;
 using Service.Services.CommentServices;
 using Service.Services.DepartmentServices;
+using Service.Services.NewsFeedServices;
 using Service.Services.NotificationServices;
 using Service.Services.OrganizationServices;
 using Service.Services.PageRequestServices;
@@ -46,9 +49,26 @@ builder.Services.AddScoped<IGeminiService, GeminiService>();
 builder.Services.AddScoped<ISentimentService, SentimentService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<INewsFeedService, NewsFeedService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationState>();
 
-builder.Services.AddAuthorizationCore();
+builder.Services.AddAuthorizationCore(options =>
+{
+    // Register a policy for each page-level permission.
+    // Each policy checks that the user's "access" claim contains the permission name.
+    foreach (var permission in AdminPermissions.All)
+    {
+        options.AddPolicy(permission, policy =>
+            policy.RequireAssertion(context =>
+            {
+                var accessClaim = context.User.FindFirst("access");
+                if (accessClaim is null) return false;
+                var permissions = accessClaim.Value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                return permissions.Contains(permission, StringComparer.OrdinalIgnoreCase);
+            }));
+    }
+});
 
 await builder.Build().RunAsync();

@@ -1,0 +1,77 @@
+﻿@using Domain.Constants
+
+<MudDialog>
+    <TitleContent>
+        Edit Access — @Model.Name
+    </TitleContent>
+    <DialogContent>
+        <MudText Typo="Typo.subtitle2" Class="mb-2">Page Access Permissions</MudText>
+        <MudStack Row Wrap="Wrap.Wrap" Spacing="2">
+            @foreach (var permission in AdminPermissions.All)
+            {
+                var isSelected = _selectedPermissions.Contains(permission);
+                <MudChip T="string"
+                         Color="@(isSelected ? Color.Primary : Color.Default)"
+                         Variant="@(isSelected ? Variant.Filled : Variant.Outlined)"
+                         OnClick="() => TogglePermission(permission)"
+                         Icon="@(isSelected ? Icons.Material.Filled.Check : Icons.Material.Filled.Add)">
+                    @permission
+                </MudChip>
+            }
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit" Variant="Variant.Filled" Disabled="_isSubmitting">
+            @if (_isSubmitting)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate Class="mr-2" />
+            }
+            Save
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public AdminAccountModel Model { get; set; } = new();
+
+    private HashSet<string> _selectedPermissions = new();
+    private bool _isSubmitting;
+
+    protected override void OnInitialized()
+    {
+        _selectedPermissions = new HashSet<string>(Model.AccessControl ?? []);
+    }
+
+    private void TogglePermission(string permission)
+    {
+        if (!_selectedPermissions.Remove(permission))
+            _selectedPermissions.Add(permission);
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task Submit()
+    {
+        _isSubmitting = true;
+
+        try
+        {
+            await _adminService.UpdateAccessControlAsync(Model.Id, _selectedPermissions.ToArray());
+            _snackBar.Add("Access control updated successfully", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (Exception ex)
+        {
+            _snackBar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+}
+

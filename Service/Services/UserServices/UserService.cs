@@ -101,5 +101,60 @@ namespace Service.Services.UserServices
 
             return response;
         }
+
+        public async Task<Result> VerifyEmailAsync(string email, string code)
+        {
+            request.RequestUrl = $"{defaultRequestUrl}/verify-email";
+            request.RequestType = Enums.RequestType.POST;
+            request.Data = new { Email = email, Code = code };
+
+            var response = await _baseService.SendAsync<Result>(request);
+
+            return response;
+        }
+
+        public async Task<Result> ResendVerificationCodeAsync(string email)
+        {
+            request.RequestUrl = $"{defaultRequestUrl}/resend-code";
+            request.RequestType = Enums.RequestType.POST;
+            request.Data = new { Email = email };
+
+            var response = await _baseService.SendAsync<Result>(request);
+
+            return response;
+        }
+
+        public async Task<Result> DeleteUserAsync(string userId)
+        {
+            request.RequestUrl = $"{defaultRequestUrl}/{userId}";
+            request.RequestType = Enums.RequestType.DELETE;
+            request.Data = null;
+
+            var response = await _baseService.SendAsync<Result>(request);
+
+            return response;
+        }
+
+        public async Task<Result> RequestPasswordResetAsync(string email, string baseUrl)
+        {
+            request.RequestUrl = $"{defaultRequestUrl}/request-password-reset";
+            request.RequestType = Enums.RequestType.POST;
+            request.Data = new { Email = email, BaseUrl = baseUrl };
+
+            var response = await _baseService.SendAsync<Result>(request);
+
+            return response;
+        }
+
+        public async Task<Result> ResetPasswordAsync(string guid, string newPassword, string confirmPassword)
+        {
+            request.RequestUrl = $"{defaultRequestUrl}/reset-password";
+            request.RequestType = Enums.RequestType.POST;
+            request.Data = new { Guid = guid, NewPassword = newPassword, ConfirmPassword = confirmPassword };
+
+            var response = await _baseService.SendAsync<Result>(request);
+
+            return response;
+        }
     }
 }

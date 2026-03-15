@@ -7,6 +7,7 @@ using Camcon.WebAPI.Controllers;
 using WebAPI.ApplicationDBContextService;
 using WebAPI.Constants;
 using WebAPI.Interfaces;
+using WebAPI.Services.EmailService;
 
 namespace WebAPI.Commands.Users.Commands.CreateCommand
 {
@@ -15,11 +16,22 @@ namespace WebAPI.Commands.Users.Commands.CreateCommand
         private readonly UserManager<ApplicationUserModel> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ILogger<AuthController> _logger;
-        public CreateAccountCommandHandler(UserManager<ApplicationUserModel> userManager, RoleManager<IdentityRole> roleManager, ILogger<AuthController> logger, AppDbContext context) : base(context)
+        private readonly VerificationCodeService _verificationCodeService;
+        private readonly IEmailService _emailService;
+
+        public CreateAccountCommandHandler(
+            UserManager<ApplicationUserModel> userManager,
+            RoleManager<IdentityRole> roleManager,
+            ILogger<AuthController> logger,
+            AppDbContext context,
+            VerificationCodeService verificationCodeService,
+            IEmailService emailService) : base(context)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _logger = logger;
+            _verificationCodeService = verificationCodeService;
+            _emailService = emailService;
         }
 
         public async Task<Result> Handle(CreateAccountCommand command, CancellationToken cancellationToken)
@@ -49,7 +61,7 @@ namespace WebAPI.Commands.Users.Commands.CreateCommand
                 user.SecurityStamp = Guid.NewGuid().ToString();
                 user.UserName = command.Request.Email;
                 user.Name = command.Request.Name;
-                user.EmailConfirmed = true;
+                user.EmailConfirmed = false; // Requires email verification
                 user.ProfileInformationId = guid;
                 user.ProfileInformation = command.Request.ProfileInformation;
                 user.ProfileInformation!.ProfileInformationId = guid;
@@ -73,6 +85,11 @@ namespace WebAPI.Commands.Users.Commands.CreateCommand
                     var errors = addUserToRoleResult.Errors.Select(e => e.Description);
                     _logger.LogError($"Failed to add role to the user. Errors : {string.Join(",", errors)}");
                 }
+
+                // Generate verification code and send email
+                var code = _verificationCodeService.GenerateAndStore(command.Request.Email);
+                await _emailService.SendVerificationCodeAsync(command.Request.Email, code);
+
                 return Result.Success();
             }
             catch (Exception ex)

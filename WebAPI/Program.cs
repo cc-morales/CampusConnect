@@ -8,6 +8,7 @@ using Camcon.WebAPI.Data;
 using System.Text;
 using WebAPI.ApplicationDBContextService;
 using WebAPI.NotifyHub;
+using WebAPI.Services.EmailService;
 using WebAPI.Services.GeminiServices;
 using WebAPI.Services.NotificationService;
 using WebAPI.Services.TokenServices;
@@ -23,6 +24,9 @@ builder.Services.AddIdentity<ApplicationUserModel, IdentityRole>()
                 .AddDefaultTokenProviders();
 
 builder.Services.AddSignalR();
+builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<VerificationCodeService>();
+builder.Services.AddScoped<IEmailService, ElasticEmailService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddHttpClient<IGeminiService, GeminiService>()

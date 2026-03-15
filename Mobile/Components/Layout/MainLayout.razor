@@ -79,9 +79,13 @@
     </Authorized>
     <NotAuthorized>
         <div class="login">
-            @if(!_isRegister)
+            @if(_isForgotPassword)
             {
-                <LoginComponent OnRegisterClick="ToggleRegister" OnLogin="OnInitializedAsync"></LoginComponent>
+                <ForgotPasswordComponent OnBackToLogin="ToggleForgotPassword" ResetUrl="@_resetUrl"></ForgotPasswordComponent>
+            }
+            else if(!_isRegister)
+            {
+                <LoginComponent OnRegisterClick="ToggleRegister" OnForgotPasswordClick="ToggleForgotPassword" OnLogin="OnInitializedAsync"></LoginComponent>
             } else
             {
                 <RegisterComponent OnBack="ToggleRegister"></RegisterComponent>
@@ -92,9 +96,12 @@
 
 @code {
 
-    private bool _isRegister, _open;
+    private bool _isRegister, _open, _isForgotPassword;
+    private string _resetUrl = string.Empty;
 
     private void ToggleRegister() => _isRegister = !_isRegister;
+
+    private void ToggleForgotPassword() => _isForgotPassword = !_isForgotPassword;
 
     private void ToggleDrawer() => _open = !_open;
 
@@ -103,6 +110,8 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+
+        _resetUrl = _configuration["BaseAPI:AdminUrl"] ?? string.Empty;
 
         _layoutNotifierService.OnChanged += HandleChange;
 

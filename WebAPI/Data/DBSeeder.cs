@@ -1,4 +1,5 @@
 ﻿using CamCon.Domain.Enitity;
+using Domain.Constants;
 using Microsoft.AspNetCore.Identity;
 using WebAPI.Constants;
 
@@ -29,7 +30,8 @@ namespace Camcon.WebAPI.Data
                         UserName = "admin",
                         Email = "cyrilleconm@gmail.com",
                         EmailConfirmed = true,
-                        SecurityStamp = Guid.NewGuid().ToString()
+                        SecurityStamp = Guid.NewGuid().ToString(),
+                        AccessControl = string.Join(",", AdminPermissions.All)
                     };
 
                     // Create Admin role if it doesn't exist
@@ -73,6 +75,20 @@ namespace Camcon.WebAPI.Data
                         logger.LogError($"Failed to add admin role to user. Errors : {string.Join(",", errors)}");
                     }
                     logger.LogInformation("Admin user is created");
+                }
+
+                // Backfill: ensure all existing Admin-role users have full permissions
+                var allAdmins = await userManager.GetUsersInRoleAsync(Roles.Admin);
+                var allPermissions = string.Join(",", AdminPermissions.All);
+
+                foreach (var admin in allAdmins)
+                {
+                    if (string.IsNullOrEmpty(admin.AccessControl))
+                    {
+                        admin.AccessControl = allPermissions;
+                        await userManager.UpdateAsync(admin);
+                        logger.LogInformation("Backfilled AccessControl for admin: {Email}", admin.Email);
+                    }
                 }
             }
 

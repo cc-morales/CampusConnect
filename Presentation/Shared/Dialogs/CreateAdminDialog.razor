@@ -1,0 +1,113 @@
+﻿@using Domain.Constants
+
+<MudDialog>
+    <TitleContent>
+        Create Admin Account
+    </TitleContent>
+    <DialogContent>
+        <MudStack Class="gap-3">
+            <MudTextField @bind-Value="Model.Name"
+                          Label="Full Name"
+                          Variant="Variant.Outlined"
+                          ShrinkLabel
+                          Required
+                          RequiredError="Name is required" />
+
+            <MudTextField @bind-Value="Model.Email"
+                          Label="Email"
+                          Variant="Variant.Outlined"
+                          ShrinkLabel
+                          InputType="InputType.Email"
+                          Required
+                          RequiredError="Email is required" />
+
+            <MudTextField @bind-Value="Model.Password"
+                          Label="Password"
+                          Variant="Variant.Outlined"
+                          ShrinkLabel
+                          InputType="InputType.Password"
+                          Required
+                          RequiredError="Password is required"
+                          HelperText="Min 6 chars, requires uppercase, lowercase, digit, and symbol" />
+
+            <MudText Typo="Typo.subtitle2" Class="mt-2">Page Access Permissions</MudText>
+            <MudStack Row Wrap="Wrap.Wrap" Spacing="2">
+                @foreach (var permission in AdminPermissions.All)
+                {
+                    var isSelected = _selectedPermissions.Contains(permission);
+                    <MudChip T="string"
+                             Color="@(isSelected ? Color.Primary : Color.Default)"
+                             Variant="@(isSelected ? Variant.Filled : Variant.Outlined)"
+                             OnClick="() => TogglePermission(permission)"
+                             Icon="@(isSelected ? Icons.Material.Filled.Check : Icons.Material.Filled.Add)">
+                        @permission
+                    </MudChip>
+                }
+            </MudStack>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit" Variant="Variant.Filled" Disabled="_isSubmitting">
+            @if (_isSubmitting)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate Class="mr-2" />
+            }
+            Create
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    private AdminAccountModel Model { get; set; } = new();
+
+    private HashSet<string> _selectedPermissions = new();
+    private bool _isSubmitting;
+
+    private void TogglePermission(string permission)
+    {
+        if (!_selectedPermissions.Remove(permission))
+            _selectedPermissions.Add(permission);
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task Submit()
+    {
+        if (string.IsNullOrWhiteSpace(Model.Name) ||
+            string.IsNullOrWhiteSpace(Model.Email) ||
+            string.IsNullOrWhiteSpace(Model.Password))
+        {
+            _snackBar.Add("All fields are required", Severity.Error);
+            return;
+        }
+
+        if (_selectedPermissions.Count == 0)
+        {
+            _snackBar.Add("Select at least one page permission", Severity.Warning);
+            return;
+        }
+
+        _isSubmitting = true;
+
+        try
+        {
+            Model.AccessControl = _selectedPermissions.ToArray();
+            await _adminService.CreateAdminAsync(Model);
+            _snackBar.Add("Admin account created successfully", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (Exception ex)
+        {
+            _snackBar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+}
+

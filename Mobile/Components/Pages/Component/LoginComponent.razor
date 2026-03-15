@@ -1,4 +1,6 @@
 ﻿
+@using Mobile.Components.Pages.Dialogs
+
 <style>
     @@keyframes fadeInUp {
         from {
@@ -144,24 +146,29 @@
                 }
             </MudButton>
 
-            <MudButton 
-                Variant="Variant.Text" 
+            <MudButton
+                Variant="Variant.Text"
                 Class="guest-button"
                 Disabled="true"
                 FullWidth="true">
                 Continue as Guest
             </MudButton>
+
+            <MudText Typo="Typo.body2" Class="text-center" Style="color: #9E9E9E;">
+                <MudLink OnClick="ForgotPasswordClick" Class="register-link">Forgot password?</MudLink>
+            </MudText>
         </MudStack>
     </div>
 
     <MudText Typo="Typo.body2" Class="mt-8 text-center" Style="color: #757575;">
-        New to the community? 
+        New to the community?
         <MudLink OnClick="RegisterClick" Class="register-link ml-1">Create account</MudLink>
     </MudText>
 </div>
 
 @code {
     [Parameter] public EventCallback OnRegisterClick { get; set; }
+    [Parameter] public EventCallback OnForgotPasswordClick { get; set; }
     [Parameter] public EventCallback OnLogin { get; set; }
 
     protected string username = string.Empty, password = string.Empty;
@@ -170,6 +177,8 @@
     protected InputType PasswordInput = InputType.Password;
 
     private void RegisterClick() => OnRegisterClick.InvokeAsync();
+
+    private void ForgotPasswordClick() => OnForgotPasswordClick.InvokeAsync();
 
     protected void ToggleDrawer()
     {
@@ -216,7 +225,19 @@
         }
         catch (Exception ex)
         {
-            if (ex.Message.ToLower().Contains("invalid"))
+            if (ex.Message.Contains("email_not_confirmed"))
+            {
+                // Show verification dialog — user needs to verify email
+                var verified = await ShowVerificationDialog(username);
+                if (verified)
+                {
+                    SnackBarHelper.ShowSnackbar("Email verified! Signing in...", Variant.Filled, _snackBar, Severity.Success);
+                    // Retry login after successful verification
+                    await Login();
+                    return;
+                }
+            }
+            else if (ex.Message.ToLower().Contains("invalid"))
                 SnackBarHelper.ShowSnackbar("Invalid email or password", Variant.Filled, _snackBar, Severity.Error);
             else
                 SnackBarHelper.ShowSnackbar(ex.Message, Variant.Filled, _snackBar, Severity.Error);
@@ -241,5 +262,21 @@
             PasswordInput = InputType.Text;
         }
     }
-    
+
+    private async Task<bool> ShowVerificationDialog(string email)
+    {
+        var options = new DialogOptions
+        {
+            BackdropClick = false,
+            CloseOnEscapeKey = false,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+        var parameters = new DialogParameters { { "Email", email } };
+        var dialog = await _dialogService.ShowAsync<VerificationCodeDialog>("", parameters, options);
+        var result = await dialog.Result;
+
+        return result is not null && !result.Canceled;
+    }
+
 }

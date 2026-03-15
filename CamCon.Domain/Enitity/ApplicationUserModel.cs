@@ -17,5 +17,10 @@ namespace CamCon.Domain.Enitity
         public ProfileInfo? ProfileInformation { get; set; }
 
         public bool IsWebCreated { get; set; }
+
+        /// <summary>
+        /// Comma-separated list of page-level permissions for admin users.
+        /// </summary>
+        public string? AccessControl { get; set; }
     }
 }
