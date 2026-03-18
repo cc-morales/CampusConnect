@@ -103,7 +103,11 @@
     }
     private async Task OpenOrg()
     {
-        var dialog = await _dialogService.ShowAsync<CreateOrganizationDialog>("Create Organization");
+        var dialog = await _dialogService.ShowAsync<CreateOrganizationDialog>("Create Organization", new DialogOptions()
+        {
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        });
         var result = await dialog.Result;
     }
 }

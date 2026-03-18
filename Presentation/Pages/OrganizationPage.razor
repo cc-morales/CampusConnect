@@ -130,7 +130,7 @@
         parameters.Add("Action", action);
         parameters.Add("Model", org);
 
-        var dialog = await _dialogService.ShowAsync<CreateOrganizationDialog>(string.Empty, parameters);
+        var dialog = await _dialogService.ShowAsync<CreateOrganizationDialog>(string.Empty, parameters, options);
 
         var result = await dialog.Result;
 

@@ -1,7 +1,7 @@
 ﻿@using Domain.Models
 @using Service.Interfaces
 
-<MudStack Class="organizations hide-scrollbar" Spacing="2" Row>
+<MudStack Class="organizations hide-scrollbar" Style="width: auto" Spacing="2" Row>
     <MudIconButton OnClick="() => OnOrganizationClick(new Guid())" Icon="@Icons.Material.Filled.Home" Color="Color.Primary" Class="ma-o pa-0" Size="Size.Large"></MudIconButton>
     @foreach (var org in OrganizationList)
     {

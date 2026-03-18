@@ -41,6 +41,10 @@ namespace WebAPI.Migrations
                     b.Property<int>("PageRequestStatus")
                         .HasColumnType("int");
 
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("AdminPageRequestId");
 
                     b.HasIndex("Id");

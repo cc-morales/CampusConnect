@@ -21,5 +21,7 @@ namespace Domain.Models
         public string OrganizationName { get; set; } = string.Empty;
 
         public OrganizationDepartmentModel? Department { get; set; }
+        
+        public string Reason { get; set; } = string.Empty;
     }
 }
