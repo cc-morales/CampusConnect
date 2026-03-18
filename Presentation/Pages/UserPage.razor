@@ -4,37 +4,85 @@
     <Authorized>
         <PageTitle>CamCon | User</PageTitle>
 
-        <MudTable Class="standard-table mt-1" Items="UserList" Hover Bordered Striped FixedFooter Dense Filter="new Func<ApplicationUserModel, bool>(FilterFunction)">
-            <ColGroup>
-                <col />
-                <col />
-                <col style="width: 1%;" />
-            </ColGroup>
-            <ToolBarContent>
-                <MudText Typo="Typo.h6">Users</MudText>
-                <MudSpacer />
-                <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-                <MudIconButton OnClick="() => OpenDialog(Enums.Action.Create, new ApplicationUserModel())" Icon="@Icons.Material.Filled.Add"></MudIconButton>
-            </ToolBarContent>
-            <HeaderContent>
-                <MudTh>Name</MudTh>
-                <MudTh>Department</MudTh>
-                <MudTh>Action</MudTh>
-            </HeaderContent>
-            <RowTemplate Context="row">
-                <MudTd DataLabel="Sign">@row.Name</MudTd>
-                <MudTd DataLabel="Sign">@row.ProfileInformation?.MyOrganization?.OrganizationName</MudTd>
-                <MudTd>
-                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" AnchorOrigin="Origin.TopLeft" TransformOrigin="Origin.TopRight" Dense>
-                        <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="() => OpenDialog(Enums.Action.Delete, row)" Label="Edit" />
-                        @* <MudMenuItem Icon="@Icons.Material.Filled.Delete" OnClick="() => DeleteUser(row)" Label="Delete" /> *@
-                    </MudMenu>
-                </MudTd>
-            </RowTemplate>
-            <PagerContent>
-                <MudTablePager />
-            </PagerContent>
-        </MudTable>
+        <style>
+            .newsfeed-wrapper {
+                background-color: #FBFBFE;
+                min-height: 100vh;
+                padding: 20px;
+                font-family: 'Inter', sans-serif;
+            }
+
+            .header-section {
+                margin-bottom: 32px;
+                border-left: 4px solid #3F51B5;
+                padding-left: 24px;
+            }
+
+            .main-title {
+                font-weight: 800;
+                font-size: 2.5rem;
+                background: linear-gradient(135deg, #3F51B5 0%, #9C27B0 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                letter-spacing: -1.5px;
+                line-height: 1.1;
+            }
+
+            .sub-title {
+                font-weight: 600;
+                font-size: 1rem;
+                color: #6C757D;
+                margin-top: 4px;
+                letter-spacing: 0.5px;
+            }
+
+            .feed-container {
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+        </style>
+        
+        <div class="newsfeed-wrapper">
+            <div class="header-section">
+                <div class="main-title">Campus Connect</div>
+                <div class="sub-title">Users</div>
+            </div>
+
+            <div class="feed-container">
+            
+                <MudTable Class="standard-table mt-1" Items="UserList" Hover Bordered Striped FixedFooter Dense Filter="new Func<ApplicationUserModel, bool>(FilterFunction)">
+                    <ColGroup>
+                        <col />
+                        <col />
+                        <col style="width: 1%;" />
+                    </ColGroup>
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">Users</MudText>
+                        <MudSpacer />
+                        <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                        <MudIconButton OnClick="() => OpenDialog(Enums.Action.Create, new ApplicationUserModel())" Icon="@Icons.Material.Filled.Add"></MudIconButton>
+                    </ToolBarContent>
+                    <HeaderContent>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Department</MudTh>
+                        <MudTh>Action</MudTh>
+                    </HeaderContent>
+                    <RowTemplate Context="row">
+                        <MudTd DataLabel="Sign">@row.Name</MudTd>
+                        <MudTd DataLabel="Sign">@row.ProfileInformation?.MyOrganization?.OrganizationName</MudTd>
+                        <MudTd>
+                            <MudMenu Icon="@Icons.Material.Filled.MoreVert" AnchorOrigin="Origin.TopLeft" TransformOrigin="Origin.TopRight" Dense>
+                                <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="() => OpenDialog(Enums.Action.Delete, row)" Label="Edit" />
+                                @* <MudMenuItem Icon="@Icons.Material.Filled.Delete" OnClick="() => DeleteUser(row)" Label="Delete" /> *@
+                            </MudMenu>
+                        </MudTd>
+                    </RowTemplate>
+                    <PagerContent>
+                        <MudTablePager />
+                    </PagerContent>
+                </MudTable>
+            </div>
+        </div>
     </Authorized>
     <NotAuthorized>
         <MudAlert Severity="Severity.Error" Class="ma-4">You do not have permission to access this page.</MudAlert>
