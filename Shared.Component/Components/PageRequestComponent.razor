@@ -1,6 +1,8 @@
 ﻿@using CamCon.Shared.Extensions
+@using Domain
 @using Domain.Models
 @using Humanizer
+@using ZXing.QrCode.Internal
 
 @if(IsNotification)
 {
@@ -23,6 +25,10 @@
         <MudStack Spacing="0">
             <MudText Typo="Typo.body2"><b>Admin</b></MudText>
             <span style="font-size: 14px;">Your Request has been @Model.PageRequestStatus.Humanize()</span>
+            @if (Model.PageRequestStatus is Enums.PageRequestStatus.Rejected)
+            {
+                <span style="font-size: 14px; font-weight: 600">Reason: @Model.Reason</span>
+            }
             <MudText Typo="Typo.caption">@Notify.UpdatedAt.Humanize()</MudText>
         </MudStack>
     </MudStack>

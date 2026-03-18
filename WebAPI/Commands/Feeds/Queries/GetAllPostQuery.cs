@@ -1,6 +1,4 @@
-﻿using CamCon.Domain;
-using CamCon.Shared;
-using Domain;
+﻿using CamCon.Shared;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebAPI.ApplicationDBContextService;
@@ -10,30 +8,37 @@ using PaginationResponseModel = CamCon.Domain.PaginationResponseModel;
 
 namespace WebAPI.Commands.Feeds.Queries
 {
-    public record GetAllPostQuery(PaginationRequestModel request) : IRequest<Result<PaginationResponseModel>>;
+    public record GetAllPostQuery(PaginationRequestModel Request) : IRequest<Result<PaginationResponseModel>>;
 
     public class GetAllPostQueryHandler(AppDbContext context) : AppDatabaseBase(context), IRequestHandler<GetAllPostQuery, Result<PaginationResponseModel>>
     {
         public async Task<Result<PaginationResponseModel>> Handle(GetAllPostQuery request, CancellationToken cancellationToken)
         {
-
             if (request is null) return Result.Success(new PaginationResponseModel());
 
-            var list = GetDBContext().NewsFeeds.AsQueryable().AsNoTracking();
+            var query = GetDBContext().NewsFeeds
+                .AsNoTracking()
+                .AsQueryable();
+            
+            if (request.Request.MyOrganizationId is not null)
+                query = query.Where(c => c.MyOrganizationId == request.Request.MyOrganizationId);
+            
+            var totalCount = await query.CountAsync(cancellationToken);
+            
+            var records = await query
+                .Include(c => c.Images)
+                .Include(c => c.Likes)
+                .Include(c => c.MyOrganization)
+                .OrderByDescending(c => c.CreatedAt)
+                .Skip(request.Request.StartIndex)
+                .Take(request.Request.Count)
+                .AsSplitQuery()        
+                .ToListAsync(cancellationToken);
 
-            var result = await list
-                .Include( c => c.Images)
-                .Include( o => o.Likes)
-                .Include( o => o.MyOrganization)
-                .OrderByDescending( c => c.CreatedAt)
-                .Skip(request.request.StartIndex)
-                .Take(request.request.Count)
-                .ToListAsync(cancellationToken: cancellationToken);
-
-            return Result.Success(new PaginationResponseModel()
+            return Result.Success(new PaginationResponseModel
             {
-                Count = list.Count(),
-                Records = result
+                Count = totalCount,
+                Records = records
             });
         }
     }

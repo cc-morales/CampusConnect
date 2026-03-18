@@ -172,7 +172,7 @@
     [Inject] ICommentService commentService { get; set; } = null!;
     [Inject] IUserService UserService { get; set; } = null!;
 
-    [Parameter] public Guid? OrganiationId { get; set; }
+    [Parameter] public Guid? OrganizationId { get; set; }
     [Parameter] public INewsFeedService NewsFeedService { get; set; } = null!;
 
     private MudDataGrid<NewsFeedModel>? _dataGrid;
@@ -213,10 +213,10 @@
     [JSInvokable]
     public async Task OnElementVisible()
     {
-        await LoadMorePosts();
+        await LoadMorePosts(OrganizationId);
     }
 
-    private async Task LoadMorePosts()
+    private async Task LoadMorePosts(Guid? myOrganizationId = null)
     {
         if (isLoadingMore)
             return;
@@ -229,8 +229,11 @@
         {
             Count = 3,
             StartIndex = _listPost.Count,
+            MyOrganizationId = myOrganizationId
         });
 
+        if(result.Count <= 0) _listPost.Clear();
+        
         _listPost.AddRange(result?.Records ?? []);
 
         filterPost = [.._listPost];
@@ -242,13 +245,18 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    public void filterPostsByOrganization(Guid? organizationId, bool? loadAll = false)
+    public async Task FilterPostsByOrganization(Guid? organizationId, bool? loadAll = false)
     {
         if(loadAll?? false)
             filterPost = _listPost;
         else
-            filterPost = _listPost.Where(p => p.MyOrganization?.MyOrganizationId == organizationId).ToList();
+        {
+            _listPost = _listPost.Where(p => p.MyOrganizationId == organizationId).ToList();
+            await LoadMorePosts(organizationId);
+        }
+        
 
+        StateHasChanged();
     }
 
     private async Task HandleLike(Enums.LikeType likeType, NewsFeedModel model)

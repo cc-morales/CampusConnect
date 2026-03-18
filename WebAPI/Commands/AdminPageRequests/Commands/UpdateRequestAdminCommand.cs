@@ -41,6 +41,7 @@ namespace WebAPI.Commands.AdminPageRequests.Commands
                     GetDBContext().Entry(request.Request.User).State = EntityState.Unchanged;
 
                 pageRequest.PageRequestStatus = request.Request.PageRequestStatus;
+                pageRequest.Reason = request.Request.Reason;
 
                 notify.UpdatedAt = DateTime.UtcNow;
                 notify.DataJson = JsonSerializer.Serialize(pageRequest);

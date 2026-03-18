@@ -1,6 +1,7 @@
 ﻿@using Domain;
 @using MudBlazor.Extensions
 @using MudBlazor.Extensions.Components
+@using ZXing.QrCode.Internal
 
 <MudExDialog>
     <TitleContent>
@@ -19,7 +20,7 @@
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Error" OnClick="() => Submit(Enums.PageRequestStatus.Rejected)" Variant="Variant.Text">Reject</MudButton>
+        <MudButton Color="Color.Error" OnClick="() => Reject(Enums.PageRequestStatus.Rejected)" Variant="Variant.Text">Reject</MudButton>
         <MudButton Color="Color.Primary" OnClick="() => Submit(Enums.PageRequestStatus.Approved)" Variant="Variant.Filled">Approve</MudButton>
     </DialogActions>
 </MudExDialog>
@@ -56,6 +57,23 @@
         SnackBarHelper.ShowSnackbar($"Request has been {status.Humanize()}.", Variant.Filled, _snackBar, Severity.Success);
 
         MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private async Task Reject(Enums.PageRequestStatus status)
+    {
+        var resultDialog = await (await _dialogService.ShowAsync<InputDialog>("Reason for Rejection", new DialogOptions()
+        {
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        })).Result;
+
+        if (resultDialog?.Canceled is true) return;
+        
+        var reason = resultDialog?.Data as string;
+        
+        Model.Reason = reason?? string.Empty;
+
+        await Submit(status);
     }
 
     private async Task OpenAsDialog(PageRequestImageModel image)

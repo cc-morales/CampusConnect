@@ -4,43 +4,87 @@
     <Authorized>
         <PageTitle>CamCon | Organization</PageTitle>
 
-        <MudTable Class="standard-table mt-1" Items="MyOrganizationList" Hover Bordered Striped FixedFooter Dense Filter="new Func<MyOrganizationModel, bool>(FilterFunction)">
-            <ColGroup>
-                <col style="width: 30%;"/>
-                <col/>
-                <col />
-                <col />
-                <col style="width: 1%;"/>
-            </ColGroup>
-            <ToolBarContent>
-                <MudText Typo="Typo.h6">Organizations/Departments</MudText>
-                <MudSpacer />
-                <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-                <MudIconButton OnClick="() => OpenDialog(Enums.Action.Create, new())" Icon="@Icons.Material.Filled.Add"></MudIconButton>
-            </ToolBarContent>
-            <HeaderContent>
-                <MudTh>Id</MudTh>
-                <MudTh>Name</MudTh>
-                <MudTh>Type</MudTh>
-                <MudTh>User</MudTh>
-                <MudTh>Action</MudTh>
-            </HeaderContent>
-            <RowTemplate Context="row">
-                <MudTd DataLabel="Nr">@row.MyOrganizationId</MudTd>
-                <MudTd DataLabel="Sign">@row.OrganizationName</MudTd>
-                <MudTd DataLabel="Sign">@row.OrganizationType</MudTd>
-                <MudTd DataLabel="Sign">@row.User?.Name</MudTd>
-                <MudTd>
-                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" AnchorOrigin="Origin.TopLeft" TransformOrigin="Origin.TopRight" Dense>
-                        <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="() => OpenDialog(Enums.Action.Delete, row)" Label="Edit" />
-                        <MudMenuItem Icon="@Icons.Material.Filled.Delete" Label="Delete" />
-                    </MudMenu>
-                </MudTd>
-            </RowTemplate>
-            <PagerContent>
-                <MudTablePager/>
-            </PagerContent>
-        </MudTable>
+        <style>
+            .newsfeed-wrapper {
+                background-color: #FBFBFE;
+                min-height: 100vh;
+                padding: 20px;
+                font-family: 'Inter', sans-serif;
+            }
+
+            .header-section {
+                margin-bottom: 32px;
+                border-left: 4px solid #3F51B5;
+                padding-left: 24px;
+            }
+
+            .main-title {
+                font-weight: 800;
+                font-size: 2.5rem;
+                background: linear-gradient(135deg, #3F51B5 0%, #9C27B0 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                letter-spacing: -1.5px;
+                line-height: 1.1;
+            }
+
+            .sub-title {
+                font-weight: 600;
+                font-size: 1rem;
+                color: #6C757D;
+                margin-top: 4px;
+                letter-spacing: 0.5px;
+            }
+
+            .feed-container {
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+        </style>
+        
+        <div class="newsfeed-wrapper">
+            <div class="header-section">
+                <div class="main-title">Campus Connect</div>
+                <div class="sub-title">Organizations/Department</div>
+            </div>
+
+            <div class="feed-container">
+                <MudTable Class="standard-table mt-1" Items="MyOrganizationList" Hover Bordered Striped FixedFooter Dense Filter="new Func<MyOrganizationModel, bool>(FilterFunction)">
+                    <ColGroup>
+                        <col/>
+                        <col />
+                        <col />
+                        <col style="width: 1%;"/>
+                    </ColGroup>
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">Organizations/Departments</MudText>
+                        <MudSpacer />
+                        <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                        <MudIconButton OnClick="() => OpenDialog(Enums.Action.Create, new())" Icon="@Icons.Material.Filled.Add"></MudIconButton>
+                    </ToolBarContent>
+                    <HeaderContent>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Type</MudTh>
+                        <MudTh>User</MudTh>
+                        <MudTh>Action</MudTh>
+                    </HeaderContent>
+                    <RowTemplate Context="row">
+                        <MudTd DataLabel="Sign">@row.OrganizationName</MudTd>
+                        <MudTd DataLabel="Sign">@row.OrganizationType</MudTd>
+                        <MudTd DataLabel="Sign">@row.User?.Name</MudTd>
+                        <MudTd>
+                            <MudMenu Icon="@Icons.Material.Filled.MoreVert" AnchorOrigin="Origin.TopLeft" TransformOrigin="Origin.TopRight" Dense>
+                                <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="() => OpenDialog(Enums.Action.Delete, row)" Label="Edit" />
+                                <MudMenuItem Icon="@Icons.Material.Filled.Delete" Label="Delete" />
+                            </MudMenu>
+                        </MudTd>
+                    </RowTemplate>
+                    <PagerContent>
+                        <MudTablePager/>
+                    </PagerContent>
+                </MudTable>
+            </div>
+        </div>
     </Authorized>
     <NotAuthorized>
         <MudAlert Severity="Severity.Error" Class="ma-4">You do not have permission to access this page.</MudAlert>
@@ -86,7 +130,7 @@
         parameters.Add("Action", action);
         parameters.Add("Model", org);
 
-        var dialog = await _dialogService.ShowAsync<CreateOrganizationDialog>(string.Empty, parameters);
+        var dialog = await _dialogService.ShowAsync<CreateOrganizationDialog>(string.Empty, parameters, options);
 
         var result = await dialog.Result;
 

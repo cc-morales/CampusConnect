@@ -46,7 +46,7 @@
 
         <div class="newsfeed-wrapper">
             <div class="header-section">
-                <div class="main-title">Live News Feed</div>
+                <div class="main-title">Campus Connect</div>
                 <div class="sub-title">Real-time campus activity and announcements</div>
             </div>
 
@@ -58,7 +58,7 @@
                             <OrganizationView Organizaton="CurrentOrganization" AppStateService="_appStateService"></OrganizationView>
                         </ProfileContent>
                         <NewsFeedContent>
-                            <NewsFeedPosts @ref="PostComponentRef" OrganiationId="@CurrentOrganization?.MyOrganizationId" NewsFeedService="_newsFeedService"></NewsFeedPosts>
+                            <NewsFeedPosts @ref="PostComponentRef" OrganizationId="@CurrentOrganization?.MyOrganizationId" NewsFeedService="_newsFeedService"></NewsFeedPosts>
                         </NewsFeedContent>
                     </NewsFeeds>
                 </MudStack>
@@ -79,15 +79,15 @@
 
     public async Task OnOrganizationClick(Guid guid)
     {
-        if(guid.Equals(new Guid()))
+        if(guid.Equals(Guid.Empty))
         {
             CurrentOrganization = null;
-            PostComponentRef.filterPostsByOrganization(null, true);
+            await PostComponentRef.FilterPostsByOrganization(null, true);
         } 
         else
         {
             CurrentOrganization = OrganizationList.FirstOrDefault(x => x.MyOrganizationId == guid);
-            PostComponentRef.filterPostsByOrganization(CurrentOrganization?.MyOrganizationId);
+            await PostComponentRef.FilterPostsByOrganization(CurrentOrganization?.MyOrganizationId);
         }
 
         await InvokeAsync(StateHasChanged);
