@@ -6,7 +6,6 @@
 
         <MudTable Class="standard-table mt-1" Items="MyOrganizationList" Hover Bordered Striped FixedFooter Dense Filter="new Func<MyOrganizationModel, bool>(FilterFunction)">
             <ColGroup>
-                <col style="width: 30%;"/>
                 <col/>
                 <col />
                 <col />
@@ -19,14 +18,12 @@
                 <MudIconButton OnClick="() => OpenDialog(Enums.Action.Create, new())" Icon="@Icons.Material.Filled.Add"></MudIconButton>
             </ToolBarContent>
             <HeaderContent>
-                <MudTh>Id</MudTh>
                 <MudTh>Name</MudTh>
                 <MudTh>Type</MudTh>
                 <MudTh>User</MudTh>
                 <MudTh>Action</MudTh>
             </HeaderContent>
             <RowTemplate Context="row">
-                <MudTd DataLabel="Nr">@row.MyOrganizationId</MudTd>
                 <MudTd DataLabel="Sign">@row.OrganizationName</MudTd>
                 <MudTd DataLabel="Sign">@row.OrganizationType</MudTd>
                 <MudTd DataLabel="Sign">@row.User?.Name</MudTd>
