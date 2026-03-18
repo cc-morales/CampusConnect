@@ -5,6 +5,6 @@
         public int StartIndex { get; set; }
         public int Count { get; set; }
         
-        public Guid MyOrganizationId { get; set; }
+        public Guid? MyOrganizationId { get; set; }
     }
 }
