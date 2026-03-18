@@ -128,11 +128,11 @@
 
     private async Task ShowChangePassword()
     {
-        var dialogResult = await (await _dialogService.ShowAsync<ChangePasswordDialog>("", new DialogOptions()
+        await _dialogService.ShowAsync<ChangePasswordDialog>("", new DialogOptions()
         {
             MaxWidth = MaxWidth.Medium,
             CloseOnEscapeKey = false
-        })).Result;
+        });
     }
 }
 
