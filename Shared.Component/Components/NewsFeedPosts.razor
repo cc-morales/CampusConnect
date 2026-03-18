@@ -249,8 +249,12 @@
     {
         if(loadAll?? false)
             filterPost = _listPost;
-        else await LoadMorePosts(organizationId);
-            // filterPost = _listPost.Where(p => p.MyOrganizationId == organizationId).ToList();
+        else
+        {
+            _listPost = _listPost.Where(p => p.MyOrganizationId == organizationId).ToList();
+            await LoadMorePosts(organizationId);
+        }
+        
 
         StateHasChanged();
     }

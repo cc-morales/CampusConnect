@@ -79,7 +79,7 @@
 
     public async Task OnOrganizationClick(Guid guid)
     {
-        if(guid.Equals(new Guid()))
+        if(guid.Equals(Guid.Empty))
         {
             CurrentOrganization = null;
             await PostComponentRef.FilterPostsByOrganization(null, true);
