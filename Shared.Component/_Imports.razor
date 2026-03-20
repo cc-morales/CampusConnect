@@ -1,5 +1,14 @@
 ﻿@using Microsoft.AspNetCore.Components.Web
 @using Microsoft.AspNetCore.Components
 @using MudBlazor
+@using Service
 @using Service.Interfaces
+@using Service.Services.PageRequestServices
 @using Shared.Component.Helpers
+@using Shared.Component.Dialogs
+
+@inject IDialogService _dialogService
+@inject IOrganizationService _organizationService
+@inject AppStateService _appStateService
+@inject IPageRequestService _pageRequestService
+@inject ISnackbar _snackBar

@@ -28,7 +28,7 @@ namespace WebAPI.Commands.Feeds.Queries
             var records = await query
                 .Include(c => c.Images)
                 .Include(c => c.Likes)
-                .Include(c => c.MyOrganization)
+                .Include(c => c.MyOrganization).ThenInclude(c => c!.Contributors)
                 .OrderByDescending(c => c.CreatedAt)
                 .Skip(request.Request.StartIndex)
                 .Take(request.Request.Count)

@@ -25,6 +25,9 @@ namespace Domain.Models
         public byte[]? Photo { get; set; }
 
         public byte[]? CoverPhoto { get; set; }
+        
+        [ForeignKey("MyOrganizationId")]
+        public List<Contributors> Contributors { get; set; } = [];
 
         [JsonIgnore]
         public string? ProfilePicture => Photo is null ? "/images/blank_profile.png" : $"data:image/png;base64,{Convert.ToBase64String(Photo)}";

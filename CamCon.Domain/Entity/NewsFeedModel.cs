@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CamCon.Domain.Enitity
+namespace CamCon.Domain.Entity
 {
     [Table("NewsFeeds")]
     [PrimaryKey("NewsFeedId")]
@@ -31,5 +31,7 @@ namespace CamCon.Domain.Enitity
 
         [ForeignKey("NewsFeedId")]
         public List<LikeModel>? Likes { get; set; }
+        
+        
     }
 }

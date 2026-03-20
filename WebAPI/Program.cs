@@ -1,5 +1,5 @@
 using Azure.Core;
-using CamCon.Domain.Enitity;
+using CamCon.Domain.Entity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

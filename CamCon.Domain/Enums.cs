@@ -43,5 +43,11 @@ namespace CamCon.Domain
             Cry
         }
 
+        public enum PageRequestType
+        {
+            PageRequest,
+            Contributor
+        }
+
     }
 }

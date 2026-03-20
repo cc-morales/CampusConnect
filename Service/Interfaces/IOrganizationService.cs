@@ -10,5 +10,6 @@ namespace Service.Interfaces
         Task<Result> DeleteOrganizationAsync(Guid organizationId);
         Task<MyOrganizationModel?> GetOrganizationByIdAsync(Guid organizationId);
         Task<List<MyOrganizationModel>> GetAllOrganizationsAsync();
+        Task<Result> AddContributorAsync(Contributors contributor);
     }
 }

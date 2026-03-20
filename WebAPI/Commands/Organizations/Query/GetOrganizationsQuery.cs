@@ -1,4 +1,4 @@
-﻿using CamCon.Domain.Enitity;
+﻿using CamCon.Domain.Entity;
 using CamCon.Shared;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +19,7 @@ namespace WebAPI.Commands.Organizations.Query
         {
             var organizations = await GetDBContext().MyOrganizations
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Select(o => new MyOrganizationModel
                 {
                     MyOrganizationId = o.MyOrganizationId,
@@ -52,7 +53,13 @@ namespace WebAPI.Commands.Organizations.Query
                         MyOrganizationId = o.OrganizationDepartment.MyOrganizationId
                     },
                     Photo = o.Photo,
-                    CoverPhoto = o.CoverPhoto
+                    CoverPhoto = o.CoverPhoto,
+                    Contributors = o.Contributors.Select(c => new Contributors
+                    {
+                        ContributorsId = c.ContributorsId,
+                        MyOrganizationId = c.MyOrganizationId,
+                        Id = c.Id
+                    }).ToList()
                 })
                 .ToListAsync(cancellationToken);
 

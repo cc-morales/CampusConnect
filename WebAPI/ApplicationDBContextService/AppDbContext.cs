@@ -1,4 +1,4 @@
-﻿using CamCon.Domain.Enitity;
+﻿using CamCon.Domain.Entity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +21,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUserModel>
     public DbSet<PageRequestImageModel> PageRequestImages { get; set; }
     public DbSet<OrganizationDepartmentModel> OrganizationDepartments { get; set; }
     public DbSet<LikeModel> Likes { get; set; }
+    public DbSet<Contributors> Contributors { get; set; }
 
     public DbSet<SentimentModel> Sentiments { get; set; }
 
@@ -60,6 +61,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUserModel>
         builder.Entity<OrganizationDepartmentModel>().ToTable("OrganizationDepartments");
         builder.Entity<LikeModel>().ToTable("Likes");
         builder.Entity<SentimentModel>().ToTable("Sentiments");
+        builder.Entity<Contributors>().ToTable("Contributors");
 
 
         // Global Filter

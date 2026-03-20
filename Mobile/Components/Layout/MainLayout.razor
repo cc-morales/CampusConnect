@@ -17,27 +17,47 @@
     <Authorized>
         <MudLayout>
             <MudAppBar Elevation="1">
-                <MudMenu ListClass="notify-container" Size="Size.Small">
+                <MudMenu ListClass="notify-container" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
                     <ActivatorContent>
                         <MudBadge Content="@NotificationList.Count" Color="Color.Inherit" Overlap="true" Class="mx-6 my-4">
                             <MudIcon Icon="@Icons.Material.Filled.Notifications" Color="Color.Inherit"></MudIcon>
                         </MudBadge>
                     </ActivatorContent>
                     <ChildContent>
-                            @foreach (var notification in NotificationList)
+                        <MudMenuItem AutoClose="false">
+                            <ActivatableContainer>
+                                <div class="d-flex justify-space-between align-center">
+                                    <MudText Typo="Typo.subtitle2"><b>Notifications</b></MudText>
+                                    @if (NotificationList.Count > 0)
+                                    {
+                                        <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Error" OnClick="ClearAllNotifications">Clear All</MudButton>
+                                    }
+                                </div>
+                            </ActivatableContainer>
+                        </MudMenuItem>
+                        <MudDivider />
+                        @if (NotificationList.Count == 0)
+                        {
+                            <MudText Typo="Typo.body2" Class="pa-4" Align="Align.Center" Style="color: grey;">No notifications</MudText>
+                        }
+                        @foreach (var notification in NotificationList)
+                        {
+                            @if (notification.NotificationType == Enums.NotificationType.PageRequest)
                             {
-                                @if(notification.NotificationType == Enums.NotificationType.PageRequest)
-                                {
                                 var model = JsonSerializer.Deserialize<AdminPageRequestModel>(notification.DataJson);
-
-                                <MudMenuItem>
-                                        <ChildContent>
-                                            <PageRequestComponent Notify="notification" Model="model" IsUserNotification></PageRequestComponent>
-                                        </ChildContent>
-                                    </MudMenuItem>
-                                }
+                                <MudMenuItem AutoClose="false">
+                                    <ActivatableContainer>
+                                        <MudStack Row AlignItems="AlignItems.Center">
+                                            <div style="flex: 1;">
+                                                <PageRequestComponent Notify="notification" Model="model" IsUserNotification></PageRequestComponent>
+                                            </div>
+                                            <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" Color="Color.Error"
+                                                           OnClick="() => DeleteNotification(notification)" />
+                                        </MudStack>
+                                    </ActivatableContainer>
+                                </MudMenuItem>
                             }
-                       
+                        }
                     </ChildContent>
                 </MudMenu>
                 <MudSpacer />
@@ -104,6 +124,7 @@
     private void ToggleForgotPassword() => _isForgotPassword = !_isForgotPassword;
 
     private void ToggleDrawer() => _open = !_open;
+
 
     List<NotifyModel> NotificationList = new();
 
@@ -174,10 +195,27 @@
 
     private async Task RequestPage()
     {
-        var dialog = await _dialogService.ShowAsync<RequestDialog>();
+        var dialog = await _dialogService.ShowAsync<RequestDialog>("", new DialogParameters()
+        {
+            { "PageRequestType", Enums.PageRequestType.PageRequest }
+        });
 
         var result = await dialog.Result;
 
+    }
+
+    private async Task DeleteNotification(NotifyModel notification)
+    {
+        await _notificationService.DeleteNotificationAsync(notification.NotifyId);
+        NotificationList.Remove(notification);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ClearAllNotifications()
+    {
+        await _notificationService.ClearAllNotificationsAsync(_appStateService.CurrentUser.Id);
+        NotificationList.Clear();
+        await InvokeAsync(StateHasChanged);
     }
     
     private async Task ShowChangePassword()
@@ -189,3 +227,15 @@
         });
     }
 }
+
+<style>
+    .notify-container {
+        width: 320px;
+        max-height: 450px;
+        overflow-y: auto;
+    }
+
+    .notify-item:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+</style>

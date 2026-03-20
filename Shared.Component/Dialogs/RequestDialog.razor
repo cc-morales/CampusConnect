@@ -1,14 +1,16 @@
 ﻿@using Domain
+@using Domain.Models
+@using Microsoft.AspNetCore.Components.Forms
 
 <MudDialog>
     <TitleContent>
-        Request
+        @(PageRequestType == Enums.PageRequestType.PageRequest ? "Request Admin Page" : "Apply as Contributor")
     </TitleContent>
     <DialogContent>
         <MudStack Class="gap-2">
-            <MudTextField @bind-Value="Model.OrganizationName" Label="Organization" Variant="Variant.Outlined" ShrinkLabel></MudTextField>
-
-            <MudSelect T="MyOrganizationModel" Text="@department?.OrganizationName" Value="department" ValueChanged="(e) => OnDepartmentChanged(e)" Variant="Variant.Outlined" Margin="Margin.Dense" ShrinkLabel>
+            <MudTextField @bind-Value="Model.OrganizationName" Label="Organization" Variant="Variant.Outlined" ShrinkLabel Disabled="@(Organization is not null)"></MudTextField>
+            <MudSelect Label="Department" T="MyOrganizationModel" Text="@department?.OrganizationName" Value="department" ValueChanged="(e) => OnDepartmentChanged(e)" Variant="Variant.Outlined" Margin="Margin.Dense" ShrinkLabel
+                       Disabled="@(Organization is not null)">
                 @foreach (var org in DepartmentList)
                 {
                     <MudSelectItem Value="org">@org.OrganizationName</MudSelectItem>
@@ -52,6 +54,10 @@
     private IMudDialogInstance MudDialog { get; set; }
 
     [Parameter] public AdminPageRequestModel Model { get; set; } = new();
+    
+    [Parameter] public Enums.PageRequestType PageRequestType { get; set; }
+    
+    [Parameter] public MyOrganizationModel? Organization { get; set; }
 
     private List<MyOrganizationModel> DepartmentList = [];
 
@@ -64,6 +70,7 @@
     private IList<IBrowserFile> _files = new List<IBrowserFile>();
 
     private List<PageRequestImageModel> requestedFiles = new();
+    
 
     private void UploadFiles(IBrowserFile file)
     {
@@ -74,8 +81,12 @@
     protected override async Task OnInitializedAsync()
     {
         DepartmentList = await _organizationService.GetAllOrganizationsAsync();
-
+        
         DepartmentList = DepartmentList.Where(c => c.OrganizationType == Enums.OrganizationType.Department).ToList();
+
+        Model.OrganizationName = Organization?.OrganizationName?? string.Empty;
+        Model.MyOrganization = Organization;
+        Model.MyOrganizationId = Organization?.MyOrganizationId;
     }
 
     private void OnDepartmentChanged(MyOrganizationModel value)
@@ -112,6 +123,7 @@
         Model.MyOrganization = _appStateService.CurrentUser.ProfileInformation?.MyOrganization;
         Model.Id = _appStateService.CurrentUser.Id;
         Model.User = _appStateService.CurrentUser;
+        Model.PageRequestType = PageRequestType;
 
         foreach(var file in _files)
         {
@@ -135,7 +147,7 @@
         var dialog = await _dialogService.ShowAsync<ConfirmDialog>("Request Admin Page",
         new DialogParameters
         {
-            { "Description", "Are you sure you want to request an admin page?" }
+            { "Description", $"Are you sure you want to {(PageRequestType == Enums.PageRequestType.PageRequest ? "request an admin page" : "apply as contributor")}?" }
         });
         var result = await dialog.Result;
 

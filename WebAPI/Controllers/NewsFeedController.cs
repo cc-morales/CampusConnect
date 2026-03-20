@@ -41,6 +41,28 @@ namespace WebAPI.Controllers
             return StatusCode(500);
         }
 
+        [HttpPut]
+        public async Task<IActionResult> UpdatePost([FromBody] UpdatePostCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            if (result.IsSuccess)
+                return Ok(result);
+
+            return StatusCode(500);
+        }
+
+        [HttpDelete("{newsFeedId}")]
+        public async Task<IActionResult> DeletePost(Guid newsFeedId)
+        {
+            var result = await _mediator.Send(new DeletePostCommand(newsFeedId));
+
+            if (result.IsSuccess)
+                return Ok(result);
+
+            return StatusCode(500);
+        }
+
         //[HttpGet("/{organizationId}")]
         //[Authorize]
         //public async Task<IActionResult> GetPostByOrganizationId(string organizationId)

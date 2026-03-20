@@ -1,4 +1,4 @@
-namespace CamCon.Domain.Enitity
+namespace CamCon.Domain.Entity
 {
     public class ChangePasswordModel
     {

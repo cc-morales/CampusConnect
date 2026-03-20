@@ -5,17 +5,15 @@
 
 <MudExDialog>
     <TitleContent>
-        Request Admin Page
+        @(Model.PageRequestType == Enums.PageRequestType.PageRequest ? "Request Admin Page" : "Apply as Contributor")
     </TitleContent>
     <DialogContent>
         <MudStack Class="gap-2">
-            <MudText Typo="Typo.caption">@Model?.User?.Name is requesting for a page admin of @Model?.OrganizationName</MudText>
-           
+            <MudText Typo="Typo.caption">@Model?.User?.Name @(Model?.PageRequestType == Enums.PageRequestType.PageRequest ? "is requesting for a page admin of" : "is applying as contributor for") @Model?.OrganizationName</MudText>
                 @foreach (var image in PageRequest.PageRequestImages ?? [])
                 {
                     <MudButton OnClick="() => OpenAsDialog(image)" Variant="Variant.Text" Color="Color.Secondary">@image.Filename</MudButton>
                 }
-            
         </MudStack>
     </DialogContent>
     <DialogActions>

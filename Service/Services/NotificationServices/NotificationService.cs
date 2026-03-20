@@ -3,7 +3,6 @@ using Domain;
 using Domain.Models;
 using Microsoft.Extensions.Configuration;
 using Service.Interfaces;
-using System.Reflection;
 
 namespace Service.Services.NotificationServices
 {
@@ -54,6 +53,33 @@ namespace Service.Services.NotificationServices
             var response = await _baseService.SendAsync<List<NotifyModel>>(request);
 
             return response;
+        }
+
+        public async Task<Result> DeleteNotificationAsync(Guid notifyId, bool isAdmin = false)
+        {
+            request.RequestUrl = $"{defaultRequestUrl}/{notifyId}?isAdmin={isAdmin}";
+            request.RequestType = Enums.RequestType.DELETE;
+            request.Data = null;
+
+            return await _baseService.SendAsync<Result>(request);
+        }
+
+        public async Task<Result> ClearAllNotificationsAsync(string recipientUserId)
+        {
+            request.RequestUrl = $"{defaultRequestUrl}/clear/{recipientUserId}";
+            request.RequestType = Enums.RequestType.DELETE;
+            request.Data = null;
+
+            return await _baseService.SendAsync<Result>(request);
+        }
+
+        public async Task<Result> ClearAllAsync()
+        {
+            request.RequestUrl = $"{defaultRequestUrl}/clear-all";
+            request.RequestType = Enums.RequestType.DELETE;
+            request.Data = null;
+
+            return await _baseService.SendAsync<Result>(request);
         }
     }
 }

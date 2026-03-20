@@ -1,4 +1,4 @@
-﻿using CamCon.Domain.Enitity;
+﻿using CamCon.Domain.Entity;
 using CamCon.Shared;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +15,10 @@ namespace WebAPI.Commands.Notifications.Queries
 
         public async Task<Result<List<NotifyModel>>> Handle(GetByIdReciepientNotificationQuery request, CancellationToken cancellationToken)
         {
-            var notifications = await GetDBContext().Notifications.Where(c => c.RecipientUserId == request.RecipientId).ToListAsync();
+            var notifications = await GetDBContext().Notifications
+                .Where(c => c.RecipientUserId == request.RecipientId && !c.IsUserDeleted)
+                .OrderByDescending(c => c.CreatedAt)
+                .ToListAsync(cancellationToken);
 
             if (notifications is null)
                 return Result.Failure<List<NotifyModel>>(new Error(404, "Notification not found."));

@@ -6,7 +6,7 @@
     <Header OrganizationList="OrganizationList" Notifier="this"></Header>
     <NewsFeeds MyOrganization="CurrentOrganization">
         <ProfileContent>
-            <OrganizationView Organizaton="CurrentOrganization" AppStateService="_appStateService"></OrganizationView>
+            <OrganizationView Organization="CurrentOrganization" AppStateService="_appStateService"></OrganizationView>
         </ProfileContent>
         <NewsFeedContent>
             <NewsFeedPosts @ref="PostComponentRef" OrganizationId="@CurrentOrganization?.MyOrganizationId" NewsFeedService="_newsFeedService"></NewsFeedPosts>

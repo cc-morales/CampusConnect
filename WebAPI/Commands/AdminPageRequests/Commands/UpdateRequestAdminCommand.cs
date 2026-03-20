@@ -1,5 +1,5 @@
 ﻿using CamCon.Domain;
-using CamCon.Domain.Enitity;
+using CamCon.Domain.Entity;
 using CamCon.Shared;
 using CloneExtensions;
 using MediatR;
@@ -51,17 +51,31 @@ namespace WebAPI.Commands.AdminPageRequests.Commands
                 //Create org
                 if (pageRequest.PageRequestStatus is Enums.PageRequestStatus.Approved)
                 {
-                    var cloneRequest = pageRequest.GetClone();
-                    var newOrg = new MyOrganizationModel
+                    if (pageRequest.PageRequestType is Enums.PageRequestType.PageRequest)
                     {
-                        OrganizationName = cloneRequest.OrganizationName,
-                        OrganizationType = Enums.OrganizationType.Organization,
-                        Id = cloneRequest.Id,
-                        User = request.Request.User,
-                        OrganizationDepartment = new OrganizationDepartmentModel() { MyOrganizationId = request.Request.Department.MyOrganizationId }
-                    };
+                        var cloneRequest = pageRequest.GetClone();
+                        var newOrg = new MyOrganizationModel
+                        {
+                            OrganizationName = cloneRequest.OrganizationName,
+                            OrganizationType = Enums.OrganizationType.Organization,
+                            Id = cloneRequest.Id,
+                            User = request.Request.User,
+                            OrganizationDepartment = new OrganizationDepartmentModel() { MyOrganizationId = request.Request.Department.MyOrganizationId }
+                        };
 
-                    await _mediator.Send(new CreateOrganizationCommand(newOrg), cancellationToken);
+                        await _mediator.Send(new CreateOrganizationCommand(newOrg), cancellationToken);
+                    }
+                    else if (pageRequest.PageRequestType is Enums.PageRequestType.Contributor)
+                    {
+                        var contributor = new Contributors
+                        {
+                            ContributorsId = Guid.NewGuid(),
+                            MyOrganizationId = pageRequest.MyOrganizationId ?? Guid.Empty,
+                            Id = pageRequest.Id ?? string.Empty
+                        };
+
+                        await _mediator.Send(new AddContributorCommand(contributor), cancellationToken);
+                    }
                 }
 
 

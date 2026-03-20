@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
 using CamCon.Shared;
 
-namespace CamCon.Domain.Enitity
+namespace CamCon.Domain.Entity
 {
     [Table("Notifications")]
     [PrimaryKey("NotifyId")]
@@ -22,6 +22,10 @@ namespace CamCon.Domain.Enitity
         public string RecipientUserId { get; set; } = string.Empty;
 
         public DateTime? UpdatedAt { get; set; }
+
+        public bool IsUserDeleted { get; set; }
+
+        public bool IsAdminDeleted { get; set; }
     }
 
     public class NotifyModel<T> : NotifyModel

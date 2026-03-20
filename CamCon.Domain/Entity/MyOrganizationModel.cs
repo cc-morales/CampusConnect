@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CamCon.Domain.Enitity
+namespace CamCon.Domain.Entity
 {
     [Table("MyOrganizations")]
     [PrimaryKey("MyOrganizationId")]
@@ -29,5 +29,8 @@ namespace CamCon.Domain.Enitity
         public byte[]? Photo { get; set; }
 
         public byte[]? CoverPhoto { get; set; }
+
+        [ForeignKey("MyOrganizationId")]
+        public List<Contributors> Contributors { get; set; } = [];
     }
 }

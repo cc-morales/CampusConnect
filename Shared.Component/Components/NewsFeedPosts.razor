@@ -17,10 +17,17 @@
                 <MudAvatar Size="Size.Medium" Class="profile position-relative" Variant="Variant.Filled" Style="border : 1px solid #d3d3d3;">
                     <MudImage Src="@context.MyOrganization?.ProfilePicture"></MudImage>
                 </MudAvatar>
-                <MudStack Class="gap-0 pa-0" Spacing="0">
+                <MudStack Class="gap-0 pa-0 flex-grow-1" Spacing="0">
                     <MudText Typo="Typo.caption"><b>@context.MyOrganization?.OrganizationName</b></MudText>
                     <small>@context.CreatedAt.ToString("MM/dd/yyyy hh:mm tt")</small>
                 </MudStack>
+                @if (IsOwnerOrContributor(context))
+                {
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Dense>
+                        <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="() => EditPost(context)">Edit</MudMenuItem>
+                        <MudMenuItem Icon="@Icons.Material.Filled.Delete" OnClick="() => DeletePost(context)">Delete</MudMenuItem>
+                    </MudMenu>
+                }
             </MudStack>
             <MudStack>
 
@@ -343,6 +350,77 @@
         _newsFeedCommentModel = new();
         _commentParentId = null;
         replyTo = string.Empty;
+    }
+
+    private bool IsOwnerOrContributor(NewsFeedModel feed)
+    {
+        var currentUserId = appStateService?.CurrentUser?.Id;
+        if (string.IsNullOrEmpty(currentUserId)) return false;
+
+        return feed.MyOrganization?.Id == currentUserId
+            || (feed.MyOrganization?.Contributors?.Any(c => c.Id == currentUserId) ?? false);
+    }
+
+    private async Task EditPost(NewsFeedModel feed)
+    {
+        var dialog = await _dialogService.ShowAsync<EditCaptionDialog>("Edit Post", new DialogParameters
+        {
+            { "Caption", feed.Message },
+            { "Images", feed.Images }
+        }, new DialogOptions
+        {
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        });
+
+        var result = await dialog.Result;
+
+        if (result?.Canceled is true) return;
+
+        var editResult = result?.Data as EditCaptionDialog.EditPostResult;
+        if (editResult is null) return;
+
+        feed.Message = editResult.Caption;
+
+        // Remove deleted images from the local list
+        if (editResult.RemovedImageIds is { Count: > 0 })
+        {
+            feed.Images?.RemoveAll(i => editResult.RemovedImageIds.Contains(i.NewsFeedImageId));
+        }
+
+            // Add new images to the local list
+        if (editResult.NewImages is { Count: > 0 })
+        {
+            feed.Images ??= new();
+            feed.Images.AddRange(editResult.NewImages);
+        }
+
+        await NewsFeedService.UpdatePostAsync(feed, editResult.RemovedImageIds, editResult.NewImages);
+
+        SnackBarHelper.ShowSnackbar("Post updated successfully.", Variant.Filled, _snackBar, Severity.Success);
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task DeletePost(NewsFeedModel feed)
+    {
+        var dialog = await _dialogService.ShowAsync<ConfirmDialog>("Delete Post", new DialogParameters
+        {
+            { "Description", "Are you sure you want to delete this post? This action cannot be undone." }
+        });
+
+        var result = await dialog.Result;
+
+        if (result?.Canceled is true) return;
+
+        await NewsFeedService.DeletePostAsync(feed.NewsFeedId);
+
+        _listPost.Remove(feed);
+        filterPost.Remove(feed);
+
+        SnackBarHelper.ShowSnackbar("Post deleted successfully.", Variant.Filled, _snackBar, Severity.Success);
+
+        await InvokeAsync(StateHasChanged);
     }
 }
 

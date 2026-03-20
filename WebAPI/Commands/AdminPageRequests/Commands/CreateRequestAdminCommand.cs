@@ -1,5 +1,5 @@
 ﻿using CamCon.Domain;
-using CamCon.Domain.Enitity;
+using CamCon.Domain.Entity;
 using CamCon.Shared;
 using CloneExtensions;
 using MediatR;
@@ -15,15 +15,9 @@ namespace WebAPI.Commands.AdminPageRequests.Commands
 {
     public record CreateRequestAdminCommand(AdminPageRequestModel Request) : IRequest<Result>;
 
-    public class CreateRequestAdminCommandHandler : AppDatabaseBase, IRequestHandler<CreateRequestAdminCommand, Result>
+    public class CreateRequestAdminCommandHandler(AppDbContext context, IMediator mediator)
+        : AppDatabaseBase(context), IRequestHandler<CreateRequestAdminCommand, Result>
     {
-        public CreateRequestAdminCommandHandler(AppDbContext context, IMediator Mediator) : base(context)
-        {
-            this.Mediator = Mediator;
-        }
-
-        public IMediator Mediator { get; }
-
         public async Task<Result> Handle(CreateRequestAdminCommand request, CancellationToken cancellationToken)
         {
             try
@@ -65,7 +59,7 @@ namespace WebAPI.Commands.AdminPageRequests.Commands
                     DataJson = JsonSerializer.Serialize(cloneRequest),
                     RecipientUserId = cloneRequest.Id!,
                 };
-                await Mediator.Send(new CreateNotificationCommand(notification), cancellationToken);
+                await mediator.Send(new CreateNotificationCommand(notification), cancellationToken);
 
                 return Result.Success("Admin request created successfully.");
             }

@@ -67,5 +67,28 @@ namespace Service.Services.NewsFeedServices
 
             return await _baseService.SendAsync<LikeModel>(request);
         }
+
+        public async Task<Result> UpdatePostAsync(NewsFeedModel model, List<Guid>? removedImageIds = null, List<NewsFeedImageModel>? newImages = null)
+        {
+            request.RequestUrl = defaultRequestUrl;
+            request.RequestType = Enums.RequestType.PUT;
+            request.Data = new Dictionary<string, object?>
+            {
+                ["newsFeed"] = model,
+                ["removedImageIds"] = removedImageIds,
+                ["newImages"] = newImages
+            };
+
+            return await _baseService.SendAsync<Result>(request);
+        }
+
+        public async Task<Result> DeletePostAsync(Guid newsFeedId)
+        {
+            request.RequestUrl = $"{defaultRequestUrl}/{newsFeedId}";
+            request.RequestType = Enums.RequestType.DELETE;
+            request.Data = null;
+
+            return await _baseService.SendAsync<Result>(request);
+        }
     }
 }
