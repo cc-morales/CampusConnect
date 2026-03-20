@@ -14,18 +14,11 @@ namespace WebAPI.Commands.Notifications.Commands
 
         public async Task<Result> Handle(ClearNotificationsCommand request, CancellationToken cancellationToken)
         {
-            var notifications = await GetDBContext().Notifications
-                .Where(n => n.RecipientUserId == request.RecipientUserId)
-                .ToListAsync(cancellationToken);
-
-            if (notifications.Count == 0)
-                return Result.Success();
-
-            GetDBContext().Notifications.RemoveRange(notifications);
-            await GetDBContext().SaveChangesAsync(cancellationToken);
+            await GetDBContext().Notifications
+                .Where(n => n.RecipientUserId == request.RecipientUserId && !n.IsUserDeleted)
+                .ExecuteUpdateAsync(s => s.SetProperty(n => n.IsUserDeleted, true), cancellationToken);
 
             return Result.Success();
         }
     }
 }
-

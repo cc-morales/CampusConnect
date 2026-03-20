@@ -6,7 +6,7 @@ using WebAPI.Interfaces;
 
 namespace WebAPI.Commands.Notifications.Commands
 {
-    public record DeleteNotificationCommand(Guid NotifyId) : IRequest<Result>;
+    public record DeleteNotificationCommand(Guid NotifyId, bool IsAdmin = false) : IRequest<Result>;
 
     public class DeleteNotificationCommandHandler : AppDatabaseBase, IRequestHandler<DeleteNotificationCommand, Result>
     {
@@ -20,11 +20,14 @@ namespace WebAPI.Commands.Notifications.Commands
             if (notification is null)
                 return Result.Failure(new Error(StatusCodes.Status404NotFound, "Notification not found."));
 
-            GetDBContext().Notifications.Remove(notification);
+            if (request.IsAdmin)
+                notification.IsAdminDeleted = true;
+            else
+                notification.IsUserDeleted = true;
+
             await GetDBContext().SaveChangesAsync(cancellationToken);
 
             return Result.Success();
         }
     }
 }
-

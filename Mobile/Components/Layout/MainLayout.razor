@@ -24,13 +24,17 @@
                         </MudBadge>
                     </ActivatorContent>
                     <ChildContent>
-                        <div class="d-flex justify-space-between align-center px-3 py-2" @onclick:stopPropagation="true">
-                            <MudText Typo="Typo.subtitle2"><b>Notifications</b></MudText>
-                            @if (NotificationList.Count > 0)
-                            {
-                                <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Error" OnClick="ClearAllNotifications">Clear All</MudButton>
-                            }
-                        </div>
+                        <MudMenuItem AutoClose="false">
+                            <ActivatableContainer>
+                                <div class="d-flex justify-space-between align-center">
+                                    <MudText Typo="Typo.subtitle2"><b>Notifications</b></MudText>
+                                    @if (NotificationList.Count > 0)
+                                    {
+                                        <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Error" OnClick="ClearAllNotifications">Clear All</MudButton>
+                                    }
+                                </div>
+                            </ActivatableContainer>
+                        </MudMenuItem>
                         <MudDivider />
                         @if (NotificationList.Count == 0)
                         {
@@ -41,16 +45,16 @@
                             @if (notification.NotificationType == Enums.NotificationType.PageRequest)
                             {
                                 var model = JsonSerializer.Deserialize<AdminPageRequestModel>(notification.DataJson);
-                                <MudMenuItem>
-                                    <ChildContent>
+                                <MudMenuItem AutoClose="false">
+                                    <ActivatableContainer>
                                         <MudStack Row AlignItems="AlignItems.Center">
                                             <div style="flex: 1;">
                                                 <PageRequestComponent Notify="notification" Model="model" IsUserNotification></PageRequestComponent>
                                             </div>
                                             <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" Color="Color.Error"
-                                                           OnClick="() => DeleteNotification(notification)"/>
+                                                           OnClick="() => DeleteNotification(notification)" />
                                         </MudStack>
-                                    </ChildContent>
+                                    </ActivatableContainer>
                                 </MudMenuItem>
                             }
                         }
@@ -229,5 +233,9 @@
         width: 320px;
         max-height: 450px;
         overflow-y: auto;
+    }
+
+    .notify-item:hover {
+        background-color: rgba(0, 0, 0, 0.04);
     }
 </style>

@@ -334,7 +334,13 @@ namespace WebAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsAdminDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsUserDeleted")
                         .HasColumnType("bit");
 
                     b.Property<int>("NotificationType")

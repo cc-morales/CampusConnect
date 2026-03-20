@@ -17,7 +17,10 @@ namespace WebAPI.Commands.Notifications.Queries
         {
             try
             {
-                var notifications = await GetDBContext().Notifications.OrderByDescending( c => c.CreatedAt).ToListAsync(cancellationToken);
+                var notifications = await GetDBContext().Notifications
+                    .Where(c => !c.IsAdminDeleted)
+                    .OrderByDescending(c => c.CreatedAt)
+                    .ToListAsync(cancellationToken);
 
                 return Result.Success(notifications);
             }

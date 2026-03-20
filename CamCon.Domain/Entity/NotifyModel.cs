@@ -22,6 +22,10 @@ namespace CamCon.Domain.Entity
         public string RecipientUserId { get; set; } = string.Empty;
 
         public DateTime? UpdatedAt { get; set; }
+
+        public bool IsUserDeleted { get; set; }
+
+        public bool IsAdminDeleted { get; set; }
     }
 
     public class NotifyModel<T> : NotifyModel

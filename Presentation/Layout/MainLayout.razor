@@ -23,20 +23,24 @@
                     <MudText Typo="Typo.h6" Class="mr-4">Campus Connect</MudText>
                 </MudLink>
                 <MudSpacer />
-                <MudMenu ListClass="notify-container" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+                <MudMenu @ref="_notifyMenu" ListClass="notify-container" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
                     <ActivatorContent>
                         <MudBadge Content="@NotificationList.Where(c => !c.IsRead).ToList().Count" Color="Color.Inherit" Overlap="true" Class="mx-6 my-4">
                             <MudIcon Icon="@Icons.Material.Filled.Notifications" Color="Color.Inherit"></MudIcon>
                         </MudBadge>
                     </ActivatorContent>
                     <ChildContent>
-                        <div class="d-flex justify-space-between align-center px-3 py-2" @onclick:stopPropagation="true">
-                            <MudText Typo="Typo.subtitle2"><b>Notifications</b></MudText>
-                            @if (NotificationList.Count > 0)
-                            {
-                                <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Error" OnClick="ClearAllNotifications">Clear All</MudButton>
-                            }
-                        </div>
+                        <MudMenuItem AutoClose="false">
+                            <ActivatableContainer>
+                                <div class="d-flex justify-space-between align-center">
+                                    <MudText Typo="Typo.subtitle2"><b>Notifications</b></MudText>
+                                    @if (NotificationList.Count > 0)
+                                    {
+                                        <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Error" OnClick="ClearAllNotifications">Clear All</MudButton>
+                                    }
+                                </div>
+                            </ActivatableContainer>
+                        </MudMenuItem>
                         <MudDivider />
                         @if (NotificationList.Count == 0)
                         {
@@ -47,16 +51,16 @@
                             @if (notification.NotificationType == Enums.NotificationType.PageRequest)
                             {
                                 var model = JsonSerializer.Deserialize<AdminPageRequestModel>(notification.DataJson);
-                                <MudMenuItem OnClick="() => OpenRequestDialog(model, notification.NotifyId)">
-                                    <ChildContent>
+                                <MudMenuItem AutoClose="false">
+                                    <ActivatableContainer>
                                         <MudStack Row AlignItems="AlignItems.Center">
-                                            <div style="flex: 1;">
+                                            <div style="flex: 1; cursor: pointer;" @onclick="() => OpenRequestDialog(model, notification.NotifyId)">
                                                 <PageRequestComponent Notify="notification" Model="model" IsNotification></PageRequestComponent>
                                             </div>
                                             <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" Color="Color.Error"
-                                                           OnClick="() => DeleteNotification(notification)"/>
+                                                           OnClick="() => DeleteNotification(notification)" />
                                         </MudStack>
-                                    </ChildContent>
+                                    </ActivatableContainer>
                                 </MudMenuItem>
                             }
                         }
@@ -96,6 +100,7 @@
     private bool _open = false;
     private bool showForgotPassword = false;
     private List<NotifyModel> NotificationList = [];
+    private MudMenu _notifyMenu = null!;
 
 
     protected override async Task OnInitializedAsync()
@@ -140,6 +145,7 @@
 
     private async Task OpenRequestDialog(AdminPageRequestModel request, Guid notificationId)
     {
+        await _notifyMenu.CloseMenuAsync();
         var options = new DialogOptions() { MaxWidth = MaxWidth.Small, FullWidth = true, BackdropClick = true, CloseButton = true };
         var parameters = new DialogParameters() { {"Model", request}, {"NotificationId", notificationId} };
         await _dialogService.ShowExAsync<RequestAdminDialog>(string.Empty, parameters, options);
@@ -147,7 +153,7 @@
 
     private async Task DeleteNotification(NotifyModel notification)
     {
-        await _notificationService.DeleteNotificationAsync(notification.NotifyId);
+        await _notificationService.DeleteNotificationAsync(notification.NotifyId, isAdmin: true);
         NotificationList.Remove(notification);
         StateHasChanged();
     }
@@ -174,5 +180,13 @@
         width: 350px;
         max-height: 500px;
         overflow-y: auto;
+    }
+
+    .notify-item {
+        cursor: pointer;
+    }
+
+    .notify-item:hover {
+        background-color: rgba(0, 0, 0, 0.04);
     }
 </style>

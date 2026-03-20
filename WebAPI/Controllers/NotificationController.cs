@@ -1,5 +1,4 @@
-﻿
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Commands.Notifications.Commands;
@@ -44,9 +43,9 @@ namespace WebAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteNotification(Guid id)
+        public async Task<IActionResult> DeleteNotification(Guid id, [FromQuery] bool isAdmin = false)
         {
-            var result = await _mediator.Send(new DeleteNotificationCommand(id));
+            var result = await _mediator.Send(new DeleteNotificationCommand(id, isAdmin));
 
             return Ok(result);
         }

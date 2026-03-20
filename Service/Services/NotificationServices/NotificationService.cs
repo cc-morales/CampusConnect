@@ -55,9 +55,9 @@ namespace Service.Services.NotificationServices
             return response;
         }
 
-        public async Task<Result> DeleteNotificationAsync(Guid notifyId)
+        public async Task<Result> DeleteNotificationAsync(Guid notifyId, bool isAdmin = false)
         {
-            request.RequestUrl = $"{defaultRequestUrl}/{notifyId}";
+            request.RequestUrl = $"{defaultRequestUrl}/{notifyId}?isAdmin={isAdmin}";
             request.RequestType = Enums.RequestType.DELETE;
             request.Data = null;
 

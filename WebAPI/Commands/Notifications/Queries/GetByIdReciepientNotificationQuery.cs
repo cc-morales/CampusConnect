@@ -16,7 +16,7 @@ namespace WebAPI.Commands.Notifications.Queries
         public async Task<Result<List<NotifyModel>>> Handle(GetByIdReciepientNotificationQuery request, CancellationToken cancellationToken)
         {
             var notifications = await GetDBContext().Notifications
-                .Where(c => c.RecipientUserId == request.RecipientId)
+                .Where(c => c.RecipientUserId == request.RecipientId && !c.IsUserDeleted)
                 .OrderByDescending(c => c.CreatedAt)
                 .ToListAsync(cancellationToken);
 
