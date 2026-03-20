@@ -1,0 +1,174 @@
+﻿@using MudBlazor
+@using Domain.Models
+@using Microsoft.AspNetCore.Components.Forms
+
+<MudDialog>
+    <TitleContent>
+        Edit Post
+    </TitleContent>
+    <DialogContent>
+        <MudTextField T="string" @bind-Value="_caption" ShrinkLabel Margin="Margin.Dense" Label="Caption" Lines="3" AutoGrow></MudTextField>
+
+        @if (_images is { Count: > 0 } || _newImages.Count > 0)
+        {
+            <MudText Typo="Typo.caption" Class="mt-3 mb-1">Images</MudText>
+            <div class="edit-image-preview-container">
+                @foreach (var img in _images)
+                {
+                    <div class="edit-image-wrapper">
+                        <img src="@img.Image" class="edit-preview-image" alt="post image"/>
+                        <button type="button"
+                                class="edit-close-button"
+                                @onclick="() => RemoveImage(img)">
+                            ✕
+                        </button>
+                    </div>
+                }
+                @foreach (var img in _newImages)
+                {
+                    <div class="edit-image-wrapper">
+                        <img src="@($"data:image/png;base64,{Convert.ToBase64String(img.ImageData)}")" class="edit-preview-image" alt="new image"/>
+                        <button type="button"
+                                class="edit-close-button"
+                                @onclick="() => RemoveNewImage(img)">
+                            ✕
+                        </button>
+                    </div>
+                }
+            </div>
+        }
+
+        <MudFileUpload T="IReadOnlyList<IBrowserFile>"
+                       @ref="@_fileUpload"
+                       OnFilesChanged="OnInputFileChanged"
+                       AppendMultipleFiles
+                       Accept="image/*"
+                       Hidden="@true"
+                       InputClass="file-upload-input"
+                       Class="mt-3"
+                       tabindex="-1">
+            <ActivatorContent>
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.AddPhotoAlternate"
+                           Size="Size.Small">
+                    Add Images
+                </MudButton>
+            </ActivatorContent>
+        </MudFileUpload>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit" Variant="Variant.Filled">Save</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter] public string Caption { get; set; } = string.Empty;
+    [Parameter] public List<NewsFeedImageModel>? Images { get; set; }
+
+    private string _caption = string.Empty;
+    private List<NewsFeedImageModel> _images = new();
+    private List<Guid> _removedImageIds = new();
+    private List<NewsFeedImageModel> _newImages = new();
+    private MudFileUpload<IReadOnlyList<IBrowserFile>>? _fileUpload;
+
+    protected override void OnInitialized()
+    {
+        _caption = Caption;
+        _images = Images?.ToList() ?? new();
+    }
+
+    private async void OnInputFileChanged(InputFileChangeEventArgs e)
+    {
+        var files = e.GetMultipleFiles();
+
+        foreach (var file in files)
+        {
+            using var ms = new MemoryStream();
+            await file.OpenReadStream(209715200).CopyToAsync(ms);
+            var bytes = ms.ToArray();
+
+            if (bytes.Length == 0) continue;
+
+            _newImages.Add(new NewsFeedImageModel
+            {
+                ImageData = bytes
+            });
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void RemoveImage(NewsFeedImageModel img)
+    {
+        _images.Remove(img);
+        _removedImageIds.Add(img.NewsFeedImageId);
+    }
+
+    private void RemoveNewImage(NewsFeedImageModel img)
+    {
+        _newImages.Remove(img);
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(new EditPostResult
+    {
+        Caption = _caption,
+        RemovedImageIds = _removedImageIds,
+        NewImages = _newImages
+    }));
+
+    public class EditPostResult
+    {
+        public string Caption { get; set; } = string.Empty;
+        public List<Guid> RemovedImageIds { get; set; } = new();
+        public List<NewsFeedImageModel> NewImages { get; set; } = new();
+    }
+}
+
+<style>
+    .edit-image-preview-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 4px;
+    }
+
+    .edit-image-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+
+    .edit-preview-image {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .edit-close-button {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        background: rgba(0,0,0,0.5);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        font-weight: bold;
+        line-height: 16px;
+        font-size: 12px;
+    }
+
+    .edit-close-button:hover {
+        background: rgba(200,0,0,0.7);
+    }
+</style>
