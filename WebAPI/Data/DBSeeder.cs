@@ -1,4 +1,4 @@
-﻿using CamCon.Domain.Enitity;
+﻿using CamCon.Domain.Entity;
 using Domain.Constants;
 using Microsoft.AspNetCore.Identity;
 using WebAPI.Constants;

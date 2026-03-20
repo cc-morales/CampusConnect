@@ -25,7 +25,7 @@ namespace WebAPI.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("CamCon.Domain.Enitity.ApplicationUserModel", b =>
+            modelBuilder.Entity("CamCon.Domain.Entity.ApplicationUserModel", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -102,7 +102,7 @@ namespace WebAPI.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("CamCon.Domain.Enitity.DepartmentModel", b =>
+            modelBuilder.Entity("CamCon.Domain.Entity.DepartmentModel", b =>
                 {
                     b.Property<Guid>("DepartmentId")
                         .ValueGeneratedOnAdd()
@@ -117,7 +117,7 @@ namespace WebAPI.Migrations
                     b.ToTable("Departments", (string)null);
                 });
 
-            modelBuilder.Entity("CamCon.Domain.Enitity.MyOrganizationModel", b =>
+            modelBuilder.Entity("CamCon.Domain.Entity.MyOrganizationModel", b =>
                 {
                     b.Property<Guid>("MyOrganizationId")
                         .ValueGeneratedOnAdd()
@@ -144,7 +144,7 @@ namespace WebAPI.Migrations
                     b.ToTable("MyOrganizations", (string)null);
                 });
 
-            modelBuilder.Entity("CamCon.Domain.Enitity.ProfileInfo", b =>
+            modelBuilder.Entity("CamCon.Domain.Entity.ProfileInfo", b =>
                 {
                     b.Property<Guid>("ProfileInformationId")
                         .ValueGeneratedOnAdd()
@@ -166,7 +166,7 @@ namespace WebAPI.Migrations
                     b.ToTable("ProfileInformations", (string)null);
                 });
 
-            modelBuilder.Entity("CamCon.Domain.Enitity.TokenInfoModel", b =>
+            modelBuilder.Entity("CamCon.Domain.Entity.TokenInfoModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -325,27 +325,27 @@ namespace WebAPI.Migrations
                     b.ToTable("UserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("CamCon.Domain.Enitity.ApplicationUserModel", b =>
+            modelBuilder.Entity("CamCon.Domain.Entity.ApplicationUserModel", b =>
                 {
-                    b.HasOne("CamCon.Domain.Enitity.ProfileInfo", "ProfileInformation")
+                    b.HasOne("CamCon.Domain.Entity.ProfileInfo", "ProfileInformation")
                         .WithMany()
                         .HasForeignKey("ProfileInformationId");
 
                     b.Navigation("ProfileInformation");
                 });
 
-            modelBuilder.Entity("CamCon.Domain.Enitity.MyOrganizationModel", b =>
+            modelBuilder.Entity("CamCon.Domain.Entity.MyOrganizationModel", b =>
                 {
-                    b.HasOne("CamCon.Domain.Enitity.ApplicationUserModel", "User")
+                    b.HasOne("CamCon.Domain.Entity.ApplicationUserModel", "User")
                         .WithMany()
                         .HasForeignKey("Id");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("CamCon.Domain.Enitity.ProfileInfo", b =>
+            modelBuilder.Entity("CamCon.Domain.Entity.ProfileInfo", b =>
                 {
-                    b.HasOne("CamCon.Domain.Enitity.DepartmentModel", "Department")
+                    b.HasOne("CamCon.Domain.Entity.DepartmentModel", "Department")
                         .WithMany()
                         .HasForeignKey("DepartmentId");
 
@@ -363,7 +363,7 @@ namespace WebAPI.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("CamCon.Domain.Enitity.ApplicationUserModel", null)
+                    b.HasOne("CamCon.Domain.Entity.ApplicationUserModel", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -372,7 +372,7 @@ namespace WebAPI.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("CamCon.Domain.Enitity.ApplicationUserModel", null)
+                    b.HasOne("CamCon.Domain.Entity.ApplicationUserModel", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -387,7 +387,7 @@ namespace WebAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CamCon.Domain.Enitity.ApplicationUserModel", null)
+                    b.HasOne("CamCon.Domain.Entity.ApplicationUserModel", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -396,7 +396,7 @@ namespace WebAPI.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("CamCon.Domain.Enitity.ApplicationUserModel", null)
+                    b.HasOne("CamCon.Domain.Entity.ApplicationUserModel", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

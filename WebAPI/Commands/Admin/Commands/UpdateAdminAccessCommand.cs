@@ -1,4 +1,4 @@
-﻿using CamCon.Domain.Enitity;
+﻿using CamCon.Domain.Entity;
 using CamCon.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Identity;

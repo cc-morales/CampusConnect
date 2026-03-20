@@ -12,7 +12,14 @@
         </MudAvatar>
         <MudStack Spacing="0">
             <MudText Typo="Typo.body2"><b>@Model.User?.Name</b></MudText>
-            <span style="font-size: 14px;">Request Admin Page</span>
+            @if (Model.PageRequestType == Enums.PageRequestType.PageRequest)
+            {
+                <span style="font-size: 14px;">Request Admin Page</span>
+            }
+            else
+            {
+                <span style="font-size: 14px;">Request as Contributor</span>
+            }
             <MudText Typo="Typo.caption">@Notify.CreatedAt.Humanize()</MudText>
         </MudStack>
     </MudStack>
@@ -24,7 +31,7 @@
         </MudAvatar>
         <MudStack Spacing="0">
             <MudText Typo="Typo.body2"><b>Admin</b></MudText>
-            <span style="font-size: 14px;">Your Request has been @Model.PageRequestStatus.Humanize()</span>
+            <span style="font-size: 14px;">Your request as @(Model.PageRequestType == Enums.PageRequestType.PageRequest? "page admin" : "contributor") has been @Model.PageRequestStatus.Humanize()</span>
             @if (Model.PageRequestStatus is Enums.PageRequestStatus.Rejected)
             {
                 <span style="font-size: 14px; font-weight: 600">Reason: @Model.Reason</span>

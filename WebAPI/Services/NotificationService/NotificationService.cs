@@ -1,4 +1,4 @@
-﻿using CamCon.Domain.Enitity;
+﻿using CamCon.Domain.Entity;
 using Microsoft.AspNetCore.SignalR;
 using WebAPI.NotifyHub;
 

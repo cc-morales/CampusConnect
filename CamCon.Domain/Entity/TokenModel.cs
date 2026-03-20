@@ -5,14 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CamCon.Domain.Enitity
+namespace CamCon.Domain.Entity
 {
-    public record class LoginModel
+    public class TokenModel
     {
         [Required]
-        public string Username { get; set; } = string.Empty;
+        public string AccessToken { get; set; } = string.Empty;
 
         [Required]
-        public string Password { get; set; } = string.Empty;
+        public string RefreshToken { get; set; } = string.Empty;
     }
 }

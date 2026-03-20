@@ -43,5 +43,11 @@
             Angry,
             Cry
         }
+
+        public enum PageRequestType
+        {
+            PageRequest,
+            Contributor
+        }
     }
 }

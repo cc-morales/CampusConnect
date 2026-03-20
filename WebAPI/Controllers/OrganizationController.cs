@@ -45,5 +45,13 @@ namespace WebAPI.Controllers
 
             return Ok(result);
         }
+
+        [HttpPost("contributor")]
+        public async Task<IActionResult> AddContributor([FromBody] AddContributorCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            return Ok(result);
+        }
     }
 }

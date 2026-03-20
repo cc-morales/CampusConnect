@@ -6,7 +6,7 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    namespace CamCon.Domain.Enitity
+    namespace CamCon.Domain.Entity
     {
         [Table("AdminPageRequest")]
         [PrimaryKey("AdminPageRequestId")]
@@ -35,5 +35,7 @@
             public string OrganizationName { get; set; } = string.Empty;
             
             public string Reason { get; set; } = string.Empty;
+            
+            public Enums.PageRequestType PageRequestType { get; set; }
     }
 }

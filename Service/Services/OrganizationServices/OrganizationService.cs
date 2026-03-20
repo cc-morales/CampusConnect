@@ -65,5 +65,16 @@ namespace Service.Services.OrganizationServices
 
             return response;
         }
+
+        public async Task<Result> AddContributorAsync(Contributors contributor)
+        {
+            request.RequestUrl = $"{defaultRequestUrl}/contributor";
+            request.RequestType = Enums.RequestType.POST;
+            request.Data = contributor.Wrap("contributor");
+
+            var response = await _baseService.SendAsync<Result>(request);
+
+            return response;
+        }
     }
 }

@@ -1,7 +1,9 @@
-﻿@using Domain.Models
+﻿@using Domain
+@using Domain.Models
 @using Microsoft.AspNetCore.Components.Forms
 @using Service
 @using Service.Interfaces
+@using Shared.Component.Dialogs
 
 @inject IOrganizationService _organizationService
 
@@ -10,7 +12,7 @@
         <MudFileUpload Class="@($"{(IsView ? "hide-badge" : "")} d-flex justify-center file-upload")" T="IBrowserFile" Accept="*" @bind-File="selectedCoverPhoto" FilesChanged="UploadCover" Style="width: 100%;" Disabled="IsView">
             <ActivatorContent>
                 <MudBadge BadgeClass="mt-n5 ml-n4 badge-edit" Icon="@Icons.Material.Filled.CameraAlt" Origin="Origin.BottomRight" Overlap Bordered>
-                    <MudImage Class="cover-photo rounded-lg" Elevation="1" Src="@Organizaton?.CoverPicture" Height="150"></MudImage>
+                    <MudImage Class="cover-photo rounded-lg" Elevation="1" Src="@Organization?.CoverPicture" Height="150"></MudImage>
                 </MudBadge>
             </ActivatorContent>
         </MudFileUpload>
@@ -18,7 +20,7 @@
             <ActivatorContent>
                 <MudBadge BadgeClass="mt-n5 ml-n4 badge-edit" Icon="@Icons.Material.Filled.CameraAlt" Origin="Origin.BottomRight" Overlap Bordered>
                     <MudAvatar Size="Size.Large" Class="profile position-relative" Variant="Variant.Filled" Style="border : 1px solid #d3d3d3;">
-                        <MudImage Src="@Organizaton?.ProfilePicture"></MudImage>
+                        <MudImage Src="@Organization?.ProfilePicture"></MudImage>
                     </MudAvatar>
                 </MudBadge>
             </ActivatorContent>
@@ -30,7 +32,7 @@
 
             <MudStack Class="pl-3">
 
-                <MudText Typo="Typo.h6">@Organizaton?.OrganizationName</MudText>
+                <MudText Typo="Typo.h6">@Organization?.OrganizationName</MudText>
 
                 @if(MyDepartment is not null)
                 {
@@ -51,11 +53,11 @@
 
         </MudStack>
 
-        @if (AppStateService?.CurrentUser?.Id == Organizaton?.User?.Id)
+        @if (AppStateService?.CurrentUser?.Id == Organization?.User?.Id || Organization?.Contributors.Any(x => x.Id == AppStateService?.CurrentUser?.Id) is true)
         {
             <MudStack AlignItems="AlignItems.Center" Row>
                 <MudChip T="string" OnClick="Post" Icon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Medium">POST</MudChip>
-                <MudChip T="string" Icon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Medium">Edit</MudChip>
+                @* <MudChip T="string" Icon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Medium">Edit</MudChip> *@
             </MudStack>
         }
         else 
@@ -63,7 +65,7 @@
 
             <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Row>
                 <MudChip T="string" OnClick="Follow" Icon="" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Medium">Follow</MudChip>
-                <MudChip T="string" Icon="" Variant="Variant.Filled" Color="Color.Default" Size="Size.Medium">Apply as Contributor</MudChip>
+                <MudChip T="string" OnClick="RequestPage" Icon="" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Medium">Apply as Contributor</MudChip>
             </MudStack>
         }
 
@@ -74,7 +76,7 @@
 </MudGrid>
 
 @code {
-    [Parameter] public MyOrganizationModel? Organizaton { get; set; }
+    [Parameter] public MyOrganizationModel? Organization { get; set; }
     [Parameter] public bool IsView { get; set; } = false;
     [Parameter] public AppStateService? AppStateService { get; set; }
 
@@ -89,7 +91,7 @@
     {
         await base.OnParametersSetAsync();
 
-        MyDepartment = OrganiztionList.FirstOrDefault(x => x.MyOrganizationId == Organizaton?.OrganizationDepartment?.MyOrganizationId);
+        MyDepartment = OrganiztionList.FirstOrDefault(x => x.MyOrganizationId == Organization?.OrganizationDepartment?.MyOrganizationId);
 
     }
 
@@ -110,9 +112,9 @@
             {
                 await selectedCoverPhoto.OpenReadStream(209715200).CopyToAsync(memoryStream);
 
-                Organizaton.CoverPhoto = memoryStream.ToArray();
+                Organization.CoverPhoto = memoryStream.ToArray();
 
-                await _organizationService.UpdateOrganizationAsync(Organizaton);
+                await _organizationService.UpdateOrganizationAsync(Organization);
 
                 StateHasChanged();
             }
@@ -128,9 +130,9 @@
             {
                 await selectedProfile.OpenReadStream(209715200).CopyToAsync(memoryStream);
 
-                Organizaton.Photo = memoryStream.ToArray();
+                Organization.Photo = memoryStream.ToArray();
 
-                await _organizationService.UpdateOrganizationAsync(Organizaton);
+                await _organizationService.UpdateOrganizationAsync(Organization);
 
                 StateHasChanged();
             }
@@ -144,7 +146,19 @@
 
     private async Task Post()
     {
-         NavigationManager.NavigateTo($"/post/{Organizaton.MyOrganizationId}");
+         NavigationManager.NavigateTo($"/post/{Organization.MyOrganizationId}");
+    }
+    
+    private async Task RequestPage()
+    {
+        var dialog = await _dialogService.ShowAsync<RequestDialog>("", new DialogParameters()
+        {
+            { "PageRequestType", Enums.PageRequestType.Contributor },
+            { "Organization", Organization}
+        });
+
+        var result = await dialog.Result;
+
     }
 
 

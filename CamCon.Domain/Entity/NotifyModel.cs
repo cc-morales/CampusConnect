@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
 using CamCon.Shared;
 
-namespace CamCon.Domain.Enitity
+namespace CamCon.Domain.Entity
 {
     [Table("Notifications")]
     [PrimaryKey("NotifyId")]
