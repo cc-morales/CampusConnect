@@ -23,21 +23,39 @@
                     <MudText Typo="Typo.h6" Class="mr-4">Campus Connect</MudText>
                 </MudLink>
                 <MudSpacer />
-                <MudMenu ListClass="notify-container">
+                <MudMenu ListClass="notify-container" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
                     <ActivatorContent>
                         <MudBadge Content="@NotificationList.Where(c => !c.IsRead).ToList().Count" Color="Color.Inherit" Overlap="true" Class="mx-6 my-4">
                             <MudIcon Icon="@Icons.Material.Filled.Notifications" Color="Color.Inherit"></MudIcon>
                         </MudBadge>
                     </ActivatorContent>
                     <ChildContent>
+                        <div class="d-flex justify-space-between align-center px-3 py-2" @onclick:stopPropagation="true">
+                            <MudText Typo="Typo.subtitle2"><b>Notifications</b></MudText>
+                            @if (NotificationList.Count > 0)
+                            {
+                                <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Error" OnClick="ClearAllNotifications">Clear All</MudButton>
+                            }
+                        </div>
+                        <MudDivider />
+                        @if (NotificationList.Count == 0)
+                        {
+                            <MudText Typo="Typo.body2" Class="pa-4" Align="Align.Center" Style="color: grey;">No notifications</MudText>
+                        }
                         @foreach (var notification in NotificationList)
                         {
-                            @if(notification.NotificationType == Enums.NotificationType.PageRequest)
+                            @if (notification.NotificationType == Enums.NotificationType.PageRequest)
                             {
                                 var model = JsonSerializer.Deserialize<AdminPageRequestModel>(notification.DataJson);
-                            <MudMenuItem OnClick="() => OpenRequestDialog(model, notification.NotifyId)">
+                                <MudMenuItem OnClick="() => OpenRequestDialog(model, notification.NotifyId)">
                                     <ChildContent>
-                                        <PageRequestComponent Notify="notification" Model="model" IsNotification></PageRequestComponent>
+                                        <MudStack Row AlignItems="AlignItems.Center">
+                                            <div style="flex: 1;">
+                                                <PageRequestComponent Notify="notification" Model="model" IsNotification></PageRequestComponent>
+                                            </div>
+                                            <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" Color="Color.Error"
+                                                           OnClick="() => DeleteNotification(notification)"/>
+                                        </MudStack>
                                     </ChildContent>
                                 </MudMenuItem>
                             }
@@ -78,6 +96,7 @@
     private bool _open = false;
     private bool showForgotPassword = false;
     private List<NotifyModel> NotificationList = [];
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -126,6 +145,20 @@
         await _dialogService.ShowExAsync<RequestAdminDialog>(string.Empty, parameters, options);
     }
 
+    private async Task DeleteNotification(NotifyModel notification)
+    {
+        await _notificationService.DeleteNotificationAsync(notification.NotifyId);
+        NotificationList.Remove(notification);
+        StateHasChanged();
+    }
+
+    private async Task ClearAllNotifications()
+    {
+        await _notificationService.ClearAllAsync();
+        NotificationList.Clear();
+        StateHasChanged();
+    }
+
     private async Task ShowChangePassword()
     {
         await _dialogService.ShowAsync<ChangePasswordDialog>("", new DialogOptions()
@@ -138,9 +171,8 @@
 
 <style>
     .notify-container {
-        width: 300px;
-        max-width: 300px;
-        height: 600px;
+        width: 350px;
+        max-height: 500px;
         overflow-y: auto;
     }
 </style>

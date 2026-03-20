@@ -15,7 +15,10 @@ namespace WebAPI.Commands.Notifications.Queries
 
         public async Task<Result<List<NotifyModel>>> Handle(GetByIdReciepientNotificationQuery request, CancellationToken cancellationToken)
         {
-            var notifications = await GetDBContext().Notifications.Where(c => c.RecipientUserId == request.RecipientId).ToListAsync();
+            var notifications = await GetDBContext().Notifications
+                .Where(c => c.RecipientUserId == request.RecipientId)
+                .OrderByDescending(c => c.CreatedAt)
+                .ToListAsync(cancellationToken);
 
             if (notifications is null)
                 return Result.Failure<List<NotifyModel>>(new Error(404, "Notification not found."));
