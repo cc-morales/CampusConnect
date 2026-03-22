@@ -22,6 +22,7 @@ namespace WebAPI.Commands.Feeds.Commands
                 return Result.Failure(new Error(StatusCodes.Status404NotFound, "Post not found."));
 
             existing.Message = request.NewsFeed.Message;
+            existing.IsPublic = request.NewsFeed.IsPublic;
 
             if (request.RemovedImageIds is { Count: > 0 })
             {

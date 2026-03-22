@@ -9,6 +9,14 @@
     <DialogContent>
         <MudTextField T="string" @bind-Value="_caption" ShrinkLabel Margin="Margin.Dense" Label="Caption" Lines="3" AutoGrow></MudTextField>
 
+        <MudStack Row AlignItems="AlignItems.Center" Class="mt-2">
+            <MudIcon Icon="@(_isPublic ? Icons.Material.Filled.Public : Icons.Material.Filled.Lock)"
+                     Size="Size.Small"
+                     Color="@(_isPublic ? Color.Success : Color.Default)" />
+            <MudText Typo="Typo.body2">@(_isPublic ? "Public" : "Private")</MudText>
+            <MudSwitch T="bool" @bind-Value="_isPublic" Color="Color.Success" />
+        </MudStack>
+
         @if (_images is { Count: > 0 } || _newImages.Count > 0)
         {
             <MudText Typo="Typo.caption" Class="mt-3 mb-1">Images</MudText>
@@ -69,8 +77,10 @@
 
     [Parameter] public string Caption { get; set; } = string.Empty;
     [Parameter] public List<NewsFeedImageModel>? Images { get; set; }
+    [Parameter] public bool IsPublic { get; set; }
 
     private string _caption = string.Empty;
+    private bool _isPublic;
     private List<NewsFeedImageModel> _images = new();
     private List<Guid> _removedImageIds = new();
     private List<NewsFeedImageModel> _newImages = new();
@@ -79,6 +89,7 @@
     protected override void OnInitialized()
     {
         _caption = Caption;
+        _isPublic = IsPublic;
         _images = Images?.ToList() ?? new();
     }
 
@@ -119,6 +130,7 @@
     private void Submit() => MudDialog.Close(DialogResult.Ok(new EditPostResult
     {
         Caption = _caption,
+        IsPublic = _isPublic,
         RemovedImageIds = _removedImageIds,
         NewImages = _newImages
     }));
@@ -126,6 +138,7 @@
     public class EditPostResult
     {
         public string Caption { get; set; } = string.Empty;
+        public bool IsPublic { get; set; }
         public List<Guid> RemovedImageIds { get; set; } = new();
         public List<NewsFeedImageModel> NewImages { get; set; } = new();
     }

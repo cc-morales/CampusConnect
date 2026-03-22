@@ -394,7 +394,8 @@
         var dialog = await _dialogService.ShowAsync<EditCaptionDialog>("Edit Post", new DialogParameters
         {
             { "Caption", feed.Message },
-            { "Images", feed.Images }
+            { "Images", feed.Images },
+            { "IsPublic", feed.IsPublic }
         }, new DialogOptions
         {
             MaxWidth = MaxWidth.Small,
@@ -409,6 +410,7 @@
         if (editResult is null) return;
 
         feed.Message = editResult.Caption;
+        feed.IsPublic = editResult.IsPublic;
 
         // Remove deleted images from the local list
         if (editResult.RemovedImageIds is { Count: > 0 })
