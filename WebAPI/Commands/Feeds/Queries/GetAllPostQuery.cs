@@ -35,6 +35,7 @@ namespace WebAPI.Commands.Feeds.Queries
                 .Include(c => c.Images)
                 .Include(c => c.Likes)
                 .Include(c => c.MyOrganization).ThenInclude(c => c!.Contributors)
+                .Include(c => c.MyOrganization).ThenInclude(c => c!.Followers)
                 .OrderByDescending(c => c.CreatedAt)
                 .Skip(request.Request.StartIndex)
                 .Take(request.Request.Count)

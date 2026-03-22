@@ -178,6 +178,26 @@ namespace WebAPI.Migrations
                     b.ToTable("Departments", (string)null);
                 });
 
+            modelBuilder.Entity("CamCon.Domain.Entity.Follower", b =>
+                {
+                    b.Property<Guid>("FollowerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("MyOrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("FollowerId");
+
+                    b.HasIndex("MyOrganizationId");
+
+                    b.ToTable("Followers", (string)null);
+                });
+
             modelBuilder.Entity("CamCon.Domain.Entity.LikeModel", b =>
                 {
                     b.Property<Guid>("LikeId")
@@ -658,6 +678,15 @@ namespace WebAPI.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CamCon.Domain.Entity.Follower", b =>
+                {
+                    b.HasOne("CamCon.Domain.Entity.MyOrganizationModel", null)
+                        .WithMany("Followers")
+                        .HasForeignKey("MyOrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("CamCon.Domain.Entity.LikeModel", b =>
                 {
                     b.HasOne("CamCon.Domain.Entity.NewsFeedModel", null)
@@ -798,6 +827,8 @@ namespace WebAPI.Migrations
             modelBuilder.Entity("CamCon.Domain.Entity.MyOrganizationModel", b =>
                 {
                     b.Navigation("Contributors");
+
+                    b.Navigation("Followers");
                 });
 
             modelBuilder.Entity("CamCon.Domain.Entity.NewsFeedCommentModel", b =>

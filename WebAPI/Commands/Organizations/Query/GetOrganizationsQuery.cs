@@ -59,6 +59,12 @@ namespace WebAPI.Commands.Organizations.Query
                         ContributorsId = c.ContributorsId,
                         MyOrganizationId = c.MyOrganizationId,
                         Id = c.Id
+                    }).ToList(),
+                    Followers = o.Followers.Select(f => new Follower
+                    {
+                        FollowerId = f.FollowerId,
+                        MyOrganizationId = f.MyOrganizationId,
+                        Id = f.Id
                     }).ToList()
                 })
                 .ToListAsync(cancellationToken);

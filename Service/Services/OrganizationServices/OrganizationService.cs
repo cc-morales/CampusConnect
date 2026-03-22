@@ -76,5 +76,16 @@ namespace Service.Services.OrganizationServices
 
             return response;
         }
+
+        public async Task<Result> ToggleFollowAsync(Guid organizationId, string userId)
+        {
+            request.RequestUrl = $"{defaultRequestUrl}/{organizationId}/follow";
+            request.RequestType = Enums.RequestType.PATCH;
+            request.Data = new { UserId = userId };
+
+            var response = await _baseService.SendAsync<Result>(request);
+
+            return response;
+        }
     }
 }
