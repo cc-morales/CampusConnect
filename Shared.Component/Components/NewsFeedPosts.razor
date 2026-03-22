@@ -10,7 +10,7 @@
 
 <MudStack Class="mt-2" Style="width: 100%;">
     
-    @if(filterPost.Count <= 0 && !isLoadingMore) {
+    @if(filterPost.Count <= 0 && !isLoadingMore && OrganizationId is null) {
         <MudAlert Icon="@Icons.Material.Filled.Info" Severity="Severity.Info" Dense>No public post found</MudAlert>
     }
     else

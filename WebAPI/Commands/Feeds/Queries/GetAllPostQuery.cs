@@ -19,13 +19,16 @@ namespace WebAPI.Commands.Feeds.Queries
             var query = GetDBContext().NewsFeeds
                 .AsNoTracking()
                 .AsQueryable();
-            
-            if (request.Request.IsGuest)
-                query = query.Where(c => c.IsPublic);
 
-            if (request.Request.MyOrganizationId is not null)
+            if (request.Request.IsGuest || request.Request.MyOrganizationId is null)
+            {
+                query = query.Where(c => c.IsPublic);
+            } 
+            else 
+            {
                 query = query.Where(c => c.MyOrganizationId == request.Request.MyOrganizationId);
-            
+            }
+
             var totalCount = await query.CountAsync(cancellationToken);
             
             var records = await query
