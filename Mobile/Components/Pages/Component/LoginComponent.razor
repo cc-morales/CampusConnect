@@ -149,9 +149,17 @@
             <MudButton
                 Variant="Variant.Text"
                 Class="guest-button"
-                Disabled="true"
+                OnClick="LoginAsGuest"
                 FullWidth="true">
-                Continue as Guest
+                @if (isGuestLoading)
+                {
+                    <MudProgressCircular Size="Size.Small" Color="Color.Inherit" Indeterminate="true" Class="mr-2" />
+                    <span>Processing...</span>
+                }
+                else
+                {
+                    <span>Continue as Guest</span>
+                }
             </MudButton>
 
             <MudText Typo="Typo.body2" Class="text-center" Style="color: #9E9E9E;">
@@ -173,7 +181,7 @@
 
     protected string username = string.Empty, password = string.Empty;
     protected string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
-    protected bool _open = false, isLoading = false, isShow = false;
+    protected bool _open = false, isLoading = false, isShow = false, isGuestLoading = false;
     protected InputType PasswordInput = InputType.Password;
 
     private void RegisterClick() => OnRegisterClick.InvokeAsync();
@@ -247,6 +255,32 @@
             isLoading = false;
         }
     }
+
+    protected async Task LoginAsGuest()
+    {
+        isGuestLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            var token = await _userService.LoginAsGuest();
+
+            await _localStorage.SetItemAsync("token", token);
+
+            await ((CustomAuthenticationState)_authenticationStateProvider).NotifyUserAuthentication(token.AccessToken);
+
+            await OnLogin.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            SnackBarHelper.ShowSnackbar("Failed to login as guest. Please try again.", Variant.Filled, _snackBar, Severity.Error);
+        }
+        finally
+        {
+            isGuestLoading = false;
+        }
+    }
+
     protected void ShowPassword()
     {
         if (isShow)

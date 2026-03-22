@@ -79,6 +79,12 @@ namespace WebAPI.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("GuestExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsGuest")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsWebCreated")
                         .HasColumnType("bit");
 

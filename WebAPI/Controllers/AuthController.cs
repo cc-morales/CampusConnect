@@ -8,6 +8,7 @@ using WebAPI.ApplicationDBContextService;
 using WebAPI.Commands.Users.Commands.ChangePassword;
 using WebAPI.Commands.Users.Commands.CreateCommand;
 using WebAPI.Commands.Users.Commands.DeleteUser;
+using WebAPI.Commands.Users.Commands.GuestLogin;
 using WebAPI.Commands.Users.Commands.LoginCommand;
 using WebAPI.Commands.Users.Commands.RequestPasswordReset;
 using WebAPI.Commands.Users.Commands.ResendCode;
@@ -64,6 +65,16 @@ namespace Camcon.WebAPI.Controllers
             if (result.Error.Code == StatusCodes.Status403Forbidden)
                 return StatusCode(StatusCodes.Status403Forbidden, result.Error.Description);
             return StatusCode(500, result.Error.Description);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("guest-login")]
+        public async Task<IActionResult> GuestLogin()
+        {
+            var result = await _mediator.Send(new GuestLoginCommand());
+            if (result.IsSuccess)
+                return Ok(result.Value);
+            return StatusCode(result.Error.Code, result.Error.Description);
         }
 
         [AllowAnonymous]
