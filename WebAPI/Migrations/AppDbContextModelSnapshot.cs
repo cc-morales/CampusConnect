@@ -313,6 +313,9 @@ namespace WebAPI.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");

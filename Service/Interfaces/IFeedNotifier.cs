@@ -8,6 +8,6 @@ namespace Service.Interfaces
 {
     public interface IFeedNotifier
     {
-        Task OnOrganizationClick(Guid gui);
+        Task OnOrganizationClick(Guid? gui);
     }
 }

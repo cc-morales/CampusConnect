@@ -20,6 +20,9 @@ namespace WebAPI.Commands.Feeds.Queries
                 .AsNoTracking()
                 .AsQueryable();
             
+            if (request.Request.IsGuest)
+                query = query.Where(c => c.IsPublic);
+
             if (request.Request.MyOrganizationId is not null)
                 query = query.Where(c => c.MyOrganizationId == request.Request.MyOrganizationId);
             

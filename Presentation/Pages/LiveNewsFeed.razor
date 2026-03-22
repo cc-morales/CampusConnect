@@ -77,9 +77,9 @@
     private List<NewsFeedModel> CurrentNewsFeeds = new();
     private NewsFeedPosts PostComponentRef = null!;
 
-    public async Task OnOrganizationClick(Guid guid)
+    public async Task OnOrganizationClick(Guid? guid)
     {
-        if(guid.Equals(Guid.Empty))
+        if(guid.Equals(null))
         {
             CurrentOrganization = null;
             await PostComponentRef.FilterPostsByOrganization(null, true);

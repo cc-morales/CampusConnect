@@ -11,26 +11,14 @@ using WebAPI.Services.TokenServices;
 
 namespace WebAPI.Commands.Users.Commands.GuestLogin
 {
-    public class GuestLoginCommandHandler : AppDatabaseBase, IRequestHandler<GuestLoginCommand, Result<TokenModel>>
+    public class GuestLoginCommandHandler(
+        AppDbContext context,
+        UserManager<ApplicationUserModel> userManager,
+        RoleManager<IdentityRole> roleManager,
+        ILogger<GuestLoginCommandHandler> logger,
+        ITokenService tokenService)
+        : AppDatabaseBase(context), IRequestHandler<GuestLoginCommand, Result<TokenModel>>
     {
-        private readonly UserManager<ApplicationUserModel> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly ILogger<GuestLoginCommandHandler> _logger;
-        private readonly ITokenService _tokenService;
-
-        public GuestLoginCommandHandler(
-            AppDbContext context,
-            UserManager<ApplicationUserModel> userManager,
-            RoleManager<IdentityRole> roleManager,
-            ILogger<GuestLoginCommandHandler> logger,
-            ITokenService tokenService) : base(context)
-        {
-            _userManager = userManager;
-            _roleManager = roleManager;
-            _logger = logger;
-            _tokenService = tokenService;
-        }
-
         public async Task<Result<TokenModel>> Handle(GuestLoginCommand command, CancellationToken cancellationToken)
         {
             try
@@ -40,13 +28,13 @@ namespace WebAPI.Commands.Users.Commands.GuestLogin
                 var guestPassword = $"Guest@{Guid.NewGuid():N}";
 
                 // Ensure Guest role exists
-                if (!await _roleManager.RoleExistsAsync(Roles.Guest))
+                if (!await roleManager.RoleExistsAsync(Roles.Guest))
                 {
-                    var roleResult = await _roleManager.CreateAsync(new IdentityRole(Roles.Guest));
+                    var roleResult = await roleManager.CreateAsync(new IdentityRole(Roles.Guest));
                     if (!roleResult.Succeeded)
                     {
                         var errors = roleResult.Errors.Select(e => e.Description);
-                        _logger.LogError($"Failed to create guest role. Errors: {string.Join(",", errors)}");
+                        logger.LogError($"Failed to create guest role. Errors: {string.Join(",", errors)}");
                         return Result.Failure<TokenModel>(StatusCodeErrors.StatusCode(StatusCodes.Status500InternalServerError, "Failed to create guest role."));
                     }
                 }
@@ -62,15 +50,15 @@ namespace WebAPI.Commands.Users.Commands.GuestLogin
                     GuestExpiresAt = DateTime.UtcNow.AddHours(24)
                 };
 
-                var createResult = await _userManager.CreateAsync(user, guestPassword);
+                var createResult = await userManager.CreateAsync(user, guestPassword);
                 if (!createResult.Succeeded)
                 {
                     var errors = createResult.Errors.Select(e => e.Description);
-                    _logger.LogError($"Failed to create guest user. Errors: {string.Join(", ", errors)}");
+                    logger.LogError($"Failed to create guest user. Errors: {string.Join(", ", errors)}");
                     return Result.Failure<TokenModel>(StatusCodeErrors.StatusCode(StatusCodes.Status500InternalServerError, "Failed to create guest account."));
                 }
 
-                await _userManager.AddToRoleAsync(user, Roles.Guest);
+                await userManager.AddToRoleAsync(user, Roles.Guest);
 
                 // Create claims
                 var authClaims = new List<Claim>
@@ -83,8 +71,8 @@ namespace WebAPI.Commands.Users.Commands.GuestLogin
                 };
 
                 // Generate tokens
-                var accessToken = _tokenService.GenerateAccessToken(authClaims);
-                var refreshToken = _tokenService.GenerateRefreshToken();
+                var accessToken = tokenService.GenerateAccessToken(authClaims);
+                var refreshToken = tokenService.GenerateRefreshToken();
 
                 // Save token info
                 var tokenInfo = new TokenInfoModel
@@ -104,7 +92,7 @@ namespace WebAPI.Commands.Users.Commands.GuestLogin
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to create guest account");
+                logger.LogError(ex, "Failed to create guest account");
                 return Result.Failure<TokenModel>(StatusCodeErrors.StatusCode(StatusCodes.Status500InternalServerError, ex.Message));
             }
         }
