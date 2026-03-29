@@ -20,6 +20,8 @@ namespace Domain.Models
 
         public List<LikeModel>? Likes { get; set; }
 
+        public bool IsPublic { get; set; }
+
         [JsonIgnore]
         public bool openEmoji { get; set; }
     }

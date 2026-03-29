@@ -31,7 +31,7 @@ namespace CamCon.Domain.Entity
 
         [ForeignKey("NewsFeedId")]
         public List<LikeModel>? Likes { get; set; }
-        
-        
+
+        public bool IsPublic { get; set; }
     }
 }

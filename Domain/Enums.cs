@@ -7,7 +7,8 @@
             GET,
             POST,
             DELETE,
-            PUT
+            PUT,
+            PATCH
         }
         public enum Action
         {

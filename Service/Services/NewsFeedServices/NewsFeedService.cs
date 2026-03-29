@@ -82,6 +82,15 @@ namespace Service.Services.NewsFeedServices
             return await _baseService.SendAsync<Result>(request);
         }
 
+        public async Task<Result> UpdatePostVisibilityAsync(Guid newsFeedId, bool isPublic)
+        {
+            request.RequestUrl = $"{defaultRequestUrl}/{newsFeedId}/visibility";
+            request.RequestType = Enums.RequestType.PATCH;
+            request.Data = new { IsPublic = isPublic };
+
+            return await _baseService.SendAsync<Result>(request);
+        }
+
         public async Task<Result> DeletePostAsync(Guid newsFeedId)
         {
             request.RequestUrl = $"{defaultRequestUrl}/{newsFeedId}";

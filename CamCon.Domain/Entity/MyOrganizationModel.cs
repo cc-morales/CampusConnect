@@ -32,5 +32,8 @@ namespace CamCon.Domain.Entity
 
         [ForeignKey("MyOrganizationId")]
         public List<Contributors> Contributors { get; set; } = [];
+
+        [ForeignKey("MyOrganizationId")]
+        public List<Follower> Followers { get; set; } = [];
     }
 }

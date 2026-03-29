@@ -53,5 +53,18 @@ namespace WebAPI.Controllers
 
             return Ok(result);
         }
+
+        [HttpPatch("{organizationId}/follow")]
+        public async Task<IActionResult> ToggleFollow(Guid organizationId, [FromBody] ToggleFollowRequest request)
+        {
+            var result = await _mediator.Send(new ToggleFollowCommand(organizationId, request.UserId));
+
+            if (result.IsSuccess)
+                return Ok(result);
+
+            return StatusCode(result.Error.Code, result.Error.Description);
+        }
     }
+
+    public record ToggleFollowRequest(string UserId);
 }

@@ -44,6 +44,7 @@ namespace Service.Services.BaseService
                 Enums.RequestType.POST => HttpMethod.Post,
                 Enums.RequestType.PUT => HttpMethod.Put,
                 Enums.RequestType.DELETE => HttpMethod.Delete,
+                Enums.RequestType.PATCH => HttpMethod.Patch,
                 _ => throw new InvalidOperationException("Unsupported request type."),
             };
 

@@ -12,6 +12,14 @@
                   Variant="Variant.Outlined"
                   ShrinkLabel />
 
+    <MudStack Row AlignItems="AlignItems.Center" Class="px-1">
+        <MudIcon Icon="@(NewsFeed.IsPublic ? Icons.Material.Filled.Public : Icons.Material.Filled.Lock)"
+                 Size="Size.Small"
+                 Color="@(NewsFeed.IsPublic ? Color.Success : Color.Default)" />
+        <MudText Typo="Typo.body2">@(NewsFeed.IsPublic ? "Public" : "Private")</MudText>
+        <MudSwitch T="bool" @bind-Value="NewsFeed.IsPublic" Color="Color.Success" />
+    </MudStack>
+
     <MudFileUpload T="IReadOnlyList<IBrowserFile>"
                    @ref="@_fileUpload"
                    OnFilesChanged="OnInputFileChanged"

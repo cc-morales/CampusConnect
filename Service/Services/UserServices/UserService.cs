@@ -36,6 +36,17 @@ namespace Service.Services.UserServices
             return response;
         }
 
+        public async Task<TokenModel> LoginAsGuest()
+        {
+            request.RequestUrl = $"{defaultRequestUrl}/guest-login";
+            request.RequestType = Enums.RequestType.POST;
+            request.Data = null;
+
+            var response = await _baseService.SendAsync<TokenModel>(request);
+
+            return response;
+        }
+
         public async Task<List<ApplicationUserModel>> GetAllUsers()
         {
             request.RequestType = Enums.RequestType.GET;

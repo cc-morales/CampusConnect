@@ -42,9 +42,13 @@
             </MudStack>
             <MudDivider />
 
-            <MudStack AlignItems="AlignItems.Center" Row>
-                <MudIcon Icon="@Icons.Material.Filled.House" Size="Size.Small"></MudIcon>
-                <small>Tibiao, Antique</small>
+            <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Row>
+                <MudStack AlignItems="AlignItems.Center" Row>
+                    <MudIcon Icon="@Icons.Material.Filled.House" Size="Size.Small"></MudIcon>
+                    <small>Tibiao, Antique</small>
+                </MudStack>
+                
+                <small><strong>@Organization?.Followers.Count Followers</strong></small>
             </MudStack>
             <MudStack AlignItems="AlignItems.Center" Row>
                 <MudIcon Icon="@Icons.Material.Filled.Warehouse" Size="Size.Small"></MudIcon>
@@ -64,7 +68,14 @@
         {
 
             <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Row>
-                <MudChip T="string" OnClick="Follow" Icon="" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Medium">Follow</MudChip>
+                <MudChip T="string"
+                         OnClick="ToggleFollow"
+                         Icon="@(IsFollowing() ? Icons.Material.Filled.Check : Icons.Material.Filled.PersonAdd)"
+                         Variant="@(IsFollowing() ? Variant.Outlined : Variant.Filled)"
+                         Color="Color.Primary"
+                         Size="Size.Medium">
+                    @(IsFollowing() ? "Following" : "Follow")
+                </MudChip>
                 <MudChip T="string" OnClick="RequestPage" Icon="" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Medium">Apply as Contributor</MudChip>
             </MudStack>
         }
@@ -139,9 +150,33 @@
         }
     }
 
-    private async Task Follow()
+    private bool IsFollowing()
     {
+        var userId = AppStateService?.CurrentUser?.Id;
+        if (string.IsNullOrEmpty(userId) || Organization is null) return false;
 
+        return Organization.Followers.Any(f => f.Id == userId);
+    }
+
+    private async Task ToggleFollow()
+    {
+        var userId = AppStateService?.CurrentUser?.Id;
+        if (string.IsNullOrEmpty(userId) || Organization is null) return;
+
+        await _organizationService.ToggleFollowAsync(Organization.MyOrganizationId, userId);
+
+        var existing = Organization.Followers.FirstOrDefault(f => f.Id == userId);
+
+        if (existing is not null)
+            Organization.Followers.Remove(existing);
+        else
+            Organization.Followers.Add(new Follower
+            {
+                MyOrganizationId = Organization.MyOrganizationId,
+                Id = userId
+            });
+
+        StateHasChanged();
     }
 
     private async Task Post()

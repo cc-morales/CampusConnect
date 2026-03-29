@@ -21,17 +21,20 @@
     private List<NewsFeedModel> CurrentNewsFeeds = new();
     private NewsFeedPosts PostComponentRef = null!;
 
-    public async Task OnOrganizationClick(Guid gui)
+    public async Task OnOrganizationClick(Guid? gui)
     {
-        if(gui.Equals(Guid.Empty))
+        if(gui.Equals(null))
         {
             CurrentOrganization = null;
             await PostComponentRef.FilterPostsByOrganization(null, true);
         } 
         else
         {
-            CurrentOrganization = OrganizationList.FirstOrDefault(x => x.MyOrganizationId == gui);
-            await PostComponentRef.FilterPostsByOrganization(CurrentOrganization?.MyOrganizationId);
+            if (!_appStateService.CurrentUser.IsGuest)
+            {
+                CurrentOrganization = OrganizationList.FirstOrDefault(x => x.MyOrganizationId == gui);
+                await PostComponentRef.FilterPostsByOrganization(CurrentOrganization?.MyOrganizationId);
+            }
 
         }
 

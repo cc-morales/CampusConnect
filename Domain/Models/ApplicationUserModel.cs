@@ -19,5 +19,9 @@ namespace Domain.Models
         public ProfileInfo? ProfileInformation { get; set; }
 
         public bool IsWebCreated { get; set; }
+
+        public bool IsGuest { get; set; }
+        
+        public DateTime? GuestExpiresAt { get; set; }
     }
 }

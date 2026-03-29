@@ -19,6 +19,7 @@ namespace Service.Interfaces
         Task<LikeModel> UpdateLike(LikeModel like);
 
         Task<Result> UpdatePostAsync(NewsFeedModel newsFeed, List<Guid>? removedImageIds = null, List<NewsFeedImageModel>? newImages = null);
+        Task<Result> UpdatePostVisibilityAsync(Guid newsFeedId, bool isPublic);
         Task<Result> DeletePostAsync(Guid newsFeedId);
     }
 }

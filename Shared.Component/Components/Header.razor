@@ -2,20 +2,25 @@
 @using Service.Interfaces
 
 <MudStack Class="organizations hide-scrollbar" Style="width: auto" Spacing="2" Row>
-    <MudIconButton OnClick="() => OnOrganizationClick(new Guid())" Icon="@Icons.Material.Filled.Home" Color="Color.Primary" Class="ma-o pa-0" Size="Size.Large"></MudIconButton>
-    @foreach (var org in OrganizationList)
+    <MudIconButton OnClick="() => OnOrganizationClick(null)" Icon="@Icons.Material.Filled.Home" Color="Color.Primary" Class="ma-o pa-0" Size="Size.Large"></MudIconButton>
+    @if (!AppStateService.CurrentUser.IsGuest)
     {
-        <MudAvatar Class="cursor-pointer no-bg" @onclick="() => OnOrganizationClick(org.MyOrganizationId)" Size="Size.Large">
-            <MudImage Src="@(org.Photo is null ? "/images/blank_organization.jpg" : org.ProfilePicture)"></MudImage>
-        </MudAvatar>
+        @foreach (var org in OrganizationList)
+        {
+            <MudAvatar Class="cursor-pointer no-bg" @onclick="() => OnOrganizationClick(org.MyOrganizationId)" Size="Size.Large">
+                <MudImage Src="@(org.Photo is null ? "/images/blank_organization.jpg" : org.ProfilePicture)"></MudImage>
+            </MudAvatar>
+        }
     }
 </MudStack>
 
 @code {
+    [Inject] public AppStateService AppStateService { get; set; } = null!;
+    
     [Parameter] public List<MyOrganizationModel> OrganizationList { get; set; } = new();
     [Parameter] public IFeedNotifier? Notifier { get; set; }
 
-    private async Task OnOrganizationClick(Guid guid)
+    private async Task OnOrganizationClick(Guid? guid)
     {
         if (Notifier != null)
         {

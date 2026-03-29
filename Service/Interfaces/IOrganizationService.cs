@@ -11,5 +11,6 @@ namespace Service.Interfaces
         Task<MyOrganizationModel?> GetOrganizationByIdAsync(Guid organizationId);
         Task<List<MyOrganizationModel>> GetAllOrganizationsAsync();
         Task<Result> AddContributorAsync(Contributors contributor);
+        Task<Result> ToggleFollowAsync(Guid organizationId, string userId);
     }
 }

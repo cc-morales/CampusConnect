@@ -9,76 +9,108 @@
 @inject IJSRuntime JSRuntime
 
 <MudStack Class="mt-2" Style="width: 100%;">
-    @foreach(var context in filterPost)
+    
+    @if(filterPost.Count <= 0 && !isLoadingMore && OrganizationId is null) {
+        <MudAlert Icon="@Icons.Material.Filled.Info" Severity="Severity.Info" Dense>No public post found</MudAlert>
+    }
+    else
     {
-
-        <MudPaper Elevation="2" Class="pa-1">
-            <MudStack AlignItems="AlignItems.Center" Row>
-                <MudAvatar Size="Size.Medium" Class="profile position-relative" Variant="Variant.Filled" Style="border : 1px solid #d3d3d3;">
-                    <MudImage Src="@context.MyOrganization?.ProfilePicture"></MudImage>
-                </MudAvatar>
-                <MudStack Class="gap-0 pa-0 flex-grow-1" Spacing="0">
-                    <MudText Typo="Typo.caption"><b>@context.MyOrganization?.OrganizationName</b></MudText>
-                    <small>@context.CreatedAt.ToString("MM/dd/yyyy hh:mm tt")</small>
-                </MudStack>
-                @if (IsOwnerOrContributor(context))
-                {
-                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Dense>
-                        <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="() => EditPost(context)">Edit</MudMenuItem>
-                        <MudMenuItem Icon="@Icons.Material.Filled.Delete" OnClick="() => DeletePost(context)">Delete</MudMenuItem>
-                    </MudMenu>
-                }
-            </MudStack>
-            <MudStack>
-
-                <MudText Typo="Typo.body2" Class="mb-3">
-                    @context.Message
-                </MudText>
-
-                @if (context.Images != null && context.Images.Any())
-                {
-                    <FeedImageGallery Images="@context.Images" />
-                }
-
-                <MudStack Justify="Justify.SpaceBetween" Row>
-                    <div>
-                        @if (context.Likes is not null)
-                        {
-
-                            var reactions = context.Likes;
-
-                            foreach (var item in reactions.DistinctBy(c => c.LikeType).Take(3) ?? [])
+        foreach (var context in filterPost)
+        {
+            <MudPaper Elevation="2" Class="pa-1">
+                <MudStack AlignItems="AlignItems.Center" Row>
+                    <MudAvatar Size="Size.Medium" Class="profile position-relative" Variant="Variant.Filled" Style="border : 1px solid #d3d3d3;">
+                        <MudImage Src="@context.MyOrganization?.ProfilePicture"></MudImage>
+                    </MudAvatar>
+                    <MudStack Class="gap-0 pa-0 flex-grow-1" Spacing="0">
+                        <MudText Typo="Typo.caption"><b>@context.MyOrganization?.OrganizationName</b></MudText>
+                        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                            <small>@context.CreatedAt.ToString("MM/dd/yyyy hh:mm tt")</small>
+                            @if (IsOwnerOrContributor(context))
                             {
-                                <span class="display-reaction">@item.LikeType.ToEmoji()</span>
+                                <MudIconButton Icon="@(context.IsPublic ? Icons.Material.Filled.Public : Icons.Material.Filled.Lock)"
+                                               Size="Size.Small"
+                                               Color="@(context.IsPublic ? Color.Success : Color.Default)"
+                                               OnClick="() => ToggleVisibility(context)"
+                                               Title="@(context.IsPublic ? "Public" : "Private")"
+                                               Style="padding: 2px; min-width: unset;"/>
+                            }
+                            else
+                            {
+                                <MudIcon Icon="@(context.IsPublic ? Icons.Material.Filled.Public : Icons.Material.Filled.Lock)"
+                                         Size="Size.Small"
+                                         Color="@(context.IsPublic ? Color.Success : Color.Default)"
+                                         Title="@(context.IsPublic ? "Public" : "Private")"
+                                         Style="font-size: 16px;"/>
+                            }
+                        </MudStack>
+                    </MudStack>
+                    @if (IsOwnerOrContributor(context))
+                    {
+                        <MudMenu Icon="@Icons.Material.Filled.MoreVert" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Dense>
+                            <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="() => EditPost(context)">Edit</MudMenuItem>
+                            <MudMenuItem Icon="@Icons.Material.Filled.Delete" OnClick="() => DeletePost(context)">Delete</MudMenuItem>
+                        </MudMenu>
+                    }
+                </MudStack>
+                <MudStack>
+
+                    <MudText Typo="Typo.body2" Class="mb-3">
+                        @context.Message
+                    </MudText>
+
+                    @if (context.Images != null && context.Images.Any())
+                    {
+                        <FeedImageGallery Images="@context.Images"/>
+                    }
+
+                    <MudStack Justify="Justify.SpaceBetween" Row>
+                        <div>
+                            @if (context.Likes is not null)
+                            {
+
+                                var reactions = context.Likes;
+
+                                foreach (var item in reactions.DistinctBy(c => c.LikeType).Take(3) ?? [])
+                                {
+                                    <span class="display-reaction">@item.LikeType.ToEmoji()</span>
+                                }
+
+                                <span style="font-size: 14px;"> @(reactions.Count == 0 ? "" : reactions.Count)</span>
+                            }
+                        </div>
+                        <div>
+                            @if (context.Comments is not null)
+                            {
+                                <spanstyle style="font-size: 14px;">@context.Comments.Count Comments</spanstyle>
+
                             }
 
-                            <span style="font-size: 14px;">  @(reactions.Count == 0 ? "" : reactions.Count)</span>
-                        }
-                    </div>
-                    <div>
-                        @if (context.Comments is not null)
-                        {
-                            <spanstyle style="font-size: 14px;">@context.Comments.Count Comments</spanstyle>
-
-                        }
-
-                    </div>
+                        </div>
+                    </MudStack>
                 </MudStack>
-            </MudStack>
 
-            <MudDivider Class="my-2" />
-            <MudStack Justify="Justify.SpaceAround" Row>
-                <MudMenu @bind-Open="context.openEmoji" AnchorOrigin="Origin.TopCenter" TransformOrigin="Origin.BottomCenter">
-                    <ActivatorContent>
+                <MudDivider Class="my-2"/>
+                <MudStack Justify="Justify.SpaceAround" Row>
+                    <MudMenu @bind-Open="context.openEmoji" AnchorOrigin="Origin.TopCenter" TransformOrigin="Origin.BottomCenter">
+                        <ActivatorContent>
 
-                        @if (context.Likes is not null)
-                        {
-                            @if (context.Likes.Any(l => l.UserId == appStateService.CurrentUser.Id))
+                            @if (context.Likes is not null)
                             {
-                                <MudButton StartIcon="@Icons.Material.Filled.ThumbUp"
-                                           Variant="Variant.Text"
-                                           Size="Size.Small"
-                                           Color="Color.Primary">Like</MudButton>
+                                @if (context.Likes.Any(l => l.UserId == appStateService.CurrentUser.Id))
+                                {
+                                    <MudButton StartIcon="@Icons.Material.Filled.ThumbUp"
+                                               Variant="Variant.Text"
+                                               Size="Size.Small"
+                                               Color="Color.Primary">Like</MudButton>
+                                }
+                                else
+                                {
+                                    <MudButton StartIcon="@Icons.Material.Filled.ThumbUp"
+                                               Variant="Variant.Text"
+                                               Size="Size.Small"
+                                               Color="Color.Default">Like</MudButton>
+                                }
                             }
                             else
                             {
@@ -87,38 +119,30 @@
                                            Size="Size.Small"
                                            Color="Color.Default">Like</MudButton>
                             }
-                        }
-                        else
-                        {
-                            <MudButton StartIcon="@Icons.Material.Filled.ThumbUp"
-                                       Variant="Variant.Text"
-                                       Size="Size.Small"
-                                       Color="Color.Default">Like</MudButton>
-                        }
-                    </ActivatorContent>
-                    <ChildContent>
-                        <MudStack Class="pa-2" Row>
-                            <span class="reaction" @onclick="() => HandleLike(Enums.LikeType.Like, context)">👍</span>
-                            <span class="reaction" @onclick="() => HandleLike(Enums.LikeType.Heart, context)">❤️</span>
-                            <span class="reaction" @onclick="() => HandleLike(Enums.LikeType.Funny, context)">😆</span>
-                            <span class="reaction" @onclick="() => HandleLike(Enums.LikeType.Wow, context)">😮</span>
-                            <span class="reaction" @onclick="() => HandleLike(Enums.LikeType.Cry, context)">😢</span>
-                            <span class="reaction" @onclick="() => HandleLike(Enums.LikeType.Angry, context)">😠</span>
-                        </MudStack>
-                    </ChildContent>
-                </MudMenu>
-                <MudButton StartIcon="@Icons.Material.Filled.Comment"
-                           OnClick="()=> OpenComment(context)"
-                           Variant="Variant.Text"
-                           Size="Size.Small"
-                           Color="Color.Default">
-                    Comment
-                </MudButton>
-            </MudStack>
-        </MudPaper>
-   
-    }
+                        </ActivatorContent>
+                        <ChildContent>
+                            <MudStack Class="pa-2" Row>
+                                <span class="reaction" @onclick="() => HandleLike(Enums.LikeType.Like, context)">👍</span>
+                                <span class="reaction" @onclick="() => HandleLike(Enums.LikeType.Heart, context)">❤️</span>
+                                <span class="reaction" @onclick="() => HandleLike(Enums.LikeType.Funny, context)">😆</span>
+                                <span class="reaction" @onclick="() => HandleLike(Enums.LikeType.Wow, context)">😮</span>
+                                <span class="reaction" @onclick="() => HandleLike(Enums.LikeType.Cry, context)">😢</span>
+                                <span class="reaction" @onclick="() => HandleLike(Enums.LikeType.Angry, context)">😠</span>
+                            </MudStack>
+                        </ChildContent>
+                    </MudMenu>
+                    <MudButton StartIcon="@Icons.Material.Filled.Comment"
+                               OnClick="() => OpenComment(context)"
+                               Variant="Variant.Text"
+                               Size="Size.Small"
+                               Color="Color.Default">
+                        Comment
+                    </MudButton>
+                </MudStack>
+            </MudPaper>
 
+        }
+    }
     <div class="d-flex justify-center align-items-center" id="post-loader" style="height: 40px;">
         @if (isLoadingMore)
         {
@@ -236,7 +260,8 @@
         {
             Count = 3,
             StartIndex = _listPost.Count,
-            MyOrganizationId = myOrganizationId
+            MyOrganizationId = myOrganizationId,
+            IsGuest = appStateService.CurrentUser.IsGuest
         });
 
         if(result.Count <= 0) _listPost.Clear();
@@ -254,8 +279,11 @@
 
     public async Task FilterPostsByOrganization(Guid? organizationId, bool? loadAll = false)
     {
-        if(loadAll?? false)
+        if (loadAll ?? false)
+        {
             filterPost = _listPost;
+            await LoadMorePosts();
+        }
         else
         {
             _listPost = _listPost.Where(p => p.MyOrganizationId == organizationId).ToList();
@@ -366,7 +394,8 @@
         var dialog = await _dialogService.ShowAsync<EditCaptionDialog>("Edit Post", new DialogParameters
         {
             { "Caption", feed.Message },
-            { "Images", feed.Images }
+            { "Images", feed.Images },
+            { "IsPublic", feed.IsPublic }
         }, new DialogOptions
         {
             MaxWidth = MaxWidth.Small,
@@ -381,6 +410,7 @@
         if (editResult is null) return;
 
         feed.Message = editResult.Caption;
+        feed.IsPublic = editResult.IsPublic;
 
         // Remove deleted images from the local list
         if (editResult.RemovedImageIds is { Count: > 0 })
@@ -419,6 +449,17 @@
         filterPost.Remove(feed);
 
         SnackBarHelper.ShowSnackbar("Post deleted successfully.", Variant.Filled, _snackBar, Severity.Success);
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ToggleVisibility(NewsFeedModel feed)
+    {
+        feed.IsPublic = !feed.IsPublic;
+
+        await NewsFeedService.UpdatePostVisibilityAsync(feed.NewsFeedId, feed.IsPublic);
+
+        SnackBarHelper.ShowSnackbar($"Post set to {(feed.IsPublic ? "Public" : "Private")}.", Variant.Filled, _snackBar, Severity.Info);
 
         await InvokeAsync(StateHasChanged);
     }

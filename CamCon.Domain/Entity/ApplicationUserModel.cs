@@ -22,5 +22,8 @@ namespace CamCon.Domain.Entity
         /// Comma-separated list of page-level permissions for admin users.
         /// </summary>
         public string? AccessControl { get; set; }
+
+        public bool IsGuest { get; set; } = false;
+        public DateTime? GuestExpiresAt { get; set; }
     }
 }

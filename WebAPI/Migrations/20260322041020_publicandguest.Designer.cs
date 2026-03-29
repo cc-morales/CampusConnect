@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebAPI.ApplicationDBContextService;
 
@@ -11,9 +12,11 @@ using WebAPI.ApplicationDBContextService;
 namespace WebAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260322041020_publicandguest")]
+    partial class publicandguest
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -78,9 +81,6 @@ namespace WebAPI.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
-
-                    b.Property<DateTime?>("GuestExpiresAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsGuest")
                         .HasColumnType("bit");
@@ -176,26 +176,6 @@ namespace WebAPI.Migrations
                     b.HasKey("DepartmentId");
 
                     b.ToTable("Departments", (string)null);
-                });
-
-            modelBuilder.Entity("CamCon.Domain.Entity.Follower", b =>
-                {
-                    b.Property<Guid>("FollowerId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Id")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("MyOrganizationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("FollowerId");
-
-                    b.HasIndex("MyOrganizationId");
-
-                    b.ToTable("Followers", (string)null);
                 });
 
             modelBuilder.Entity("CamCon.Domain.Entity.LikeModel", b =>
@@ -678,15 +658,6 @@ namespace WebAPI.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("CamCon.Domain.Entity.Follower", b =>
-                {
-                    b.HasOne("CamCon.Domain.Entity.MyOrganizationModel", null)
-                        .WithMany("Followers")
-                        .HasForeignKey("MyOrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("CamCon.Domain.Entity.LikeModel", b =>
                 {
                     b.HasOne("CamCon.Domain.Entity.NewsFeedModel", null)
@@ -827,8 +798,6 @@ namespace WebAPI.Migrations
             modelBuilder.Entity("CamCon.Domain.Entity.MyOrganizationModel", b =>
                 {
                     b.Navigation("Contributors");
-
-                    b.Navigation("Followers");
                 });
 
             modelBuilder.Entity("CamCon.Domain.Entity.NewsFeedCommentModel", b =>

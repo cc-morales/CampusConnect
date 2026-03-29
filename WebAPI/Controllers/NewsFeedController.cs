@@ -7,6 +7,8 @@ using WebAPI.Commands.Feeds.Queries;
 
 namespace WebAPI.Controllers
 {
+    public record UpdatePostVisibilityRequest(bool IsPublic);
+
     [Route("api/post/")]
     [ApiController]
     [Authorize]
@@ -61,6 +63,17 @@ namespace WebAPI.Controllers
                 return Ok(result);
 
             return StatusCode(500);
+        }
+
+        [HttpPatch("{newsFeedId}/visibility")]
+        public async Task<IActionResult> UpdatePostVisibility(Guid newsFeedId, [FromBody] UpdatePostVisibilityRequest request)
+        {
+            var result = await _mediator.Send(new UpdatePostVisibilityCommand(newsFeedId, request.IsPublic));
+
+            if (result.IsSuccess)
+                return Ok(result);
+
+            return StatusCode(result.Error.Code, result.Error.Description);
         }
 
         //[HttpGet("/{organizationId}")]

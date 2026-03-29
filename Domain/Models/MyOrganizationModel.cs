@@ -29,6 +29,9 @@ namespace Domain.Models
         [ForeignKey("MyOrganizationId")]
         public List<Contributors> Contributors { get; set; } = [];
 
+        [ForeignKey("MyOrganizationId")]
+        public List<Follower> Followers { get; set; } = [];
+
         [JsonIgnore]
         public string? ProfilePicture => Photo is null ? "/images/blank_profile.png" : $"data:image/png;base64,{Convert.ToBase64String(Photo)}";
 
