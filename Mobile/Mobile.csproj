@@ -20,6 +20,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <EnableDefaultCssItems>false</EnableDefaultCssItems>
         <Nullable>enable</Nullable>
+        <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
 
         <!-- Display name -->
         <ApplicationTitle>Mobile</ApplicationTitle>
@@ -57,6 +58,11 @@
       <AndroidSigningKeyAlias>myapp</AndroidSigningKeyAlias>
       <AndroidSigningStorePass>keystore!</AndroidSigningStorePass>
       <AndroidSigningKeyPass>myappkey</AndroidSigningKeyPass>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <AndroidPackageFormat>apk</AndroidPackageFormat>
+      <AndroidUseAapt2>true</AndroidUseAapt2>
     </PropertyGroup>
 
     <ItemGroup>
