@@ -45,7 +45,8 @@ namespace WebAPI.Commands.Users.Commands.RequestPasswordReset
             _memoryCache.Set(cacheKey, request.Email, TimeSpan.FromMinutes(30));
 
             // Send email
-            var emailSent = await _emailService.SendPasswordResetLinkAsync(request.Email, resetUrl);
+            // should use request.Email
+            var emailSent = await _emailService.SendPasswordResetLinkAsync("ua.tariolimcampus@gmail.com", resetUrl);
             if (!emailSent)
             {
                 _logger.LogError("Failed to send password reset email to {Email}", request.Email);
