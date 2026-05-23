@@ -11,7 +11,10 @@ namespace Mobile
     {
         protected override void OnCreate(Bundle savedInstanceState)
         {
+           // Theme?.ApplyStyle(Resource.Style.OptOutEdgeToEdgeEnforcement, force: false);
+
             base.OnCreate(savedInstanceState);
+            AndroidX.Activity.EdgeToEdge.Enable(this);
             WebViewSoftInputPatch.Initialize();
         }
     }

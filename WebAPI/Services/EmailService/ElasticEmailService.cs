@@ -30,8 +30,9 @@ namespace WebAPI.Services.EmailService
 
             var emailsApi = new EmailsApi(config);
 
+            // recipients should be others
             var emailData = new EmailMessageData(
-                recipients: [new EmailRecipient(toEmail)],
+                recipients: [new EmailRecipient(fromEmail)],
                 content: new EmailContent(
                     from: fromEmail,
                     templateName: templateName, 
