@@ -26,7 +26,7 @@
         <ApplicationTitle>Mobile</ApplicationTitle>
 
         <!-- App Identifier -->
-        <ApplicationId>com.companyname.mobile</ApplicationId>
+        <ApplicationId>com.campusconnect.mobile</ApplicationId>
 
         <!-- Versions -->
         <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -104,6 +104,7 @@
         <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="10.0.30" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.2" />
         <PackageReference Include="MudBlazor" Version="8.13.0" />
+        <PackageReference Include="Plugin.Firebase.CloudMessaging" Version="4.0.1" />
     </ItemGroup>
 
     <ItemGroup>
@@ -113,4 +114,11 @@
       <ProjectReference Include="..\Shared.Component\Shared.Component.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Include="Platforms\Android\google-services.json">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </None>
+    </ItemGroup>
 </Project>
