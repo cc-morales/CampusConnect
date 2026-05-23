@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
     <PropertyGroup>
-        <TargetFrameworks>net10.0-android;net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks>net10.0-android</TargetFrameworks>
+        <!--<TargetFrameworks>net10.0-android;net10.0-ios;net10.0-maccatalyst</TargetFrameworks>-->
         <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.19041.0</TargetFrameworks>
         <!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
         <!-- <TargetFrameworks>$(TargetFrameworks);net9.0-tizen</TargetFrameworks> -->
@@ -105,7 +106,13 @@
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.2" />
         <PackageReference Include="MudBlazor" Version="8.13.0" />
         <PackageReference Include="Plugin.Firebase.CloudMessaging" Version="4.0.1" />
+        <PackageReference Include="Plugin.Firebase.Core" Version="4.1.0" />
     </ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-android'">
+		<PackageReference Include="Plugin.Firebase.CloudMessaging" Version="4.0.1" />
+		<PackageReference Include="Plugin.Firebase.Core" Version="4.2.0" />
+	</ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\CamCon.Shared\CamCon.Shared.csproj" />
@@ -114,11 +121,7 @@
       <ProjectReference Include="..\Shared.Component\Shared.Component.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <None Include="Platforms\Android\google-services.json">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </None>
-    </ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-android'">
+		<GoogleServicesJson Include="google-services.json" />
+	</ItemGroup>
 </Project>

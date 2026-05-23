@@ -19,6 +19,10 @@ using Service.Services.ProfileServices;
 using Service.Services.TokenProviderServices;
 using Service.Services.UserServices;
 using System.Reflection;
+using Microsoft.Maui.LifecycleEvents;
+#if ANDROID
+using Plugin.Firebase.Core.Platforms.Android;
+#endif
 
 namespace Mobile
 {
@@ -34,6 +38,8 @@ namespace Mobile
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 });
+
+            builder.RegisterFirebaseServices();
 
             builder.Services.AddMauiBlazorWebView();
 
@@ -82,13 +88,11 @@ namespace Mobile
             builder.Services.AddAuthorizationCore();
             builder.Services.AddCascadingAuthenticationState();
 
-           
-
-            AddHttpCerficate();
+            AddHttpCertificate();
 
             return builder.Build();
         }
-        private static void AddHttpCerficate()
+        private static void AddHttpCertificate()
         {
             var handler = new HttpClientHandler
             {
@@ -107,6 +111,18 @@ namespace Mobile
             }
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.Configuration["BaseAPI:Url"]!) });
+        }
+        
+        private static void RegisterFirebaseServices(this MauiAppBuilder builder)
+        {
+            builder.ConfigureLifecycleEvents(events => {
+#if ANDROID
+                events.AddAndroid(android => android.OnCreate((activity, _) =>
+                {
+                    CrossFirebase.Initialize(activity, () => activity);
+                }));
+#endif
+            });
         }
     }
 }
