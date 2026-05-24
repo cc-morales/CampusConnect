@@ -49,7 +49,7 @@
             </div>
 
             <div class="feed-container">
-                <MudTable Class="standard-table mt-1" Items="MyOrganizationList" Hover Bordered Striped FixedFooter Dense Filter="new Func<MyOrganizationModel, bool>(FilterFunction)">
+                <MudTable Class="standard-table mt-1" Loading="_isLoading" Items="MyOrganizationList" Hover Bordered Striped FixedFooter Dense Filter="new Func<MyOrganizationModel, bool>(FilterFunction)">
                     <ColGroup>
                         <col/>
                         <col />
@@ -96,6 +96,7 @@
     private List<MyOrganizationModel> MyOrganizationList = new();
 
     private string searchString = string.Empty;
+    private bool _isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -103,6 +104,7 @@
 
         MyOrganizationList = await _organizationService.GetAllOrganizationsAsync();
 
+        _isLoading = false;
         await InvokeAsync(StateHasChanged);
     }
 

@@ -127,16 +127,16 @@ code {
 }
 
 .standard-table {
-    height: calc(100vh - 70px);
+    /*height: calc(100vh - 70px);*/
     position: relative;
 }
 
-.standard-table .mud-table-pagination {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-}
+/*.standard-table .mud-table-pagination {*/
+/*    position: absolute;*/
+/*    left: 0;*/
+/*    right: 0;*/
+/*    bottom: 0;*/
+/*}*/
 .organizations {
     width: 100vw;
     overflow-x: auto;

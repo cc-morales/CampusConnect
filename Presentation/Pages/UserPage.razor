@@ -50,7 +50,7 @@
 
             <div class="feed-container">
             
-                <MudTable Class="standard-table mt-1" Items="UserList" Hover Bordered Striped FixedFooter Dense Filter="new Func<ApplicationUserModel, bool>(FilterFunction)">
+                <MudTable Class="standard-table mt-1" Loading="_isLoading" Items="UserList" Hover Bordered Striped FixedFooter Dense Filter="new Func<ApplicationUserModel, bool>(FilterFunction)">
                     <ColGroup>
                         <col />
                         <col />
@@ -95,11 +95,15 @@
 
     private string searchString = string.Empty;
 
+    private bool _isLoading;
+
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
+        _isLoading = true;
         UserList = await _userService.GetAllUsers();
+        _isLoading = false;
     }
 
     private bool FilterFunction(ApplicationUserModel element) => FilterFunction(element, searchString);
