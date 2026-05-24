@@ -87,7 +87,7 @@ namespace WebAPI.Commands.Notifications.Handlers
                         {
                             var model = JsonSerializer.Deserialize<AdminPageRequestModel>(notify.DataJson);
                             var pageRequest = GetDBContext().RequestPages.FirstOrDefault(rp => rp.AdminPageRequestId == model.AdminPageRequestId);
-                            var message = $"Your request as {(pageRequest.PageRequestType == Enums.PageRequestType.PageRequest? "page admin" : "contributor")} has been {pageRequest.PageRequestStatus.Humanize()}\nReason: {pageRequest.Reason}";
+                            var message = $"Your request as {(pageRequest.PageRequestType == Enums.PageRequestType.PageRequest? "page admin" : "contributor")} has been {pageRequest.PageRequestStatus.Humanize()}{(pageRequest.PageRequestStatus is Enums.PageRequestStatus.Rejected ? $"\nReason: {pageRequest.Reason}" : "")}";
                         
                             JsonSerializerOptions options = new()
                             {
