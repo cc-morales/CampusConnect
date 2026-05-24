@@ -146,6 +146,17 @@ namespace Service.Services.UserServices
             return response;
         }
 
+        public async Task<Result> DisableUserAsync(string userId, bool isDisabled)
+        {
+            request.RequestUrl = $"{defaultRequestUrl}/disable";
+            request.RequestType = Enums.RequestType.POST;
+            request.Data = new { UserId = userId, IsDisabled = isDisabled };
+
+            var response = await _baseService.SendAsync<Result>(request);
+
+            return response;
+        }
+
         public async Task<Result> RequestPasswordResetAsync(string email, string baseUrl)
         {
             request.RequestUrl = $"{defaultRequestUrl}/request-password-reset";

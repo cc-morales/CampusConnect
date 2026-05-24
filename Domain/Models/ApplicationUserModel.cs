@@ -23,5 +23,7 @@ namespace Domain.Models
         public bool IsGuest { get; set; }
         
         public DateTime? GuestExpiresAt { get; set; }
+        
+        public bool IsDisabled { get; set; }
     }
 }

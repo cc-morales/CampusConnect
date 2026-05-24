@@ -16,6 +16,7 @@ using WebAPI.Commands.Users.Commands.ResetPassword;
 using WebAPI.Commands.Users.Commands.VerifyEmail;
 using WebAPI.Commands.Users.Queries;
 using WebAPI.Services.TokenServices;
+using WebAPI.Commands.Users.Commands.DisableUser;
 
 namespace Camcon.WebAPI.Controllers
 {
@@ -205,6 +206,22 @@ namespace Camcon.WebAPI.Controllers
             if (result.IsSuccess)
                 return Ok(result);
             return StatusCode(result.Error.Code, result.Error.Description);
+        }
+
+        [Authorize]
+        [HttpPost("disable")]
+        public async Task<IActionResult> DisableUser([FromBody] DisableUserRequest request)
+        {
+            var result = await _mediator.Send(new DisableUserCommand(request.UserId, request.IsDisabled));
+            if (result.IsSuccess)
+                return Ok(result);
+            return StatusCode(result.Error.Code, result.Error.Description);
+        }
+
+        public class DisableUserRequest
+        {
+            public string UserId { get; set; } = string.Empty;
+            public bool IsDisabled { get; set; }
         }
 
         [AllowAnonymous]

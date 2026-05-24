@@ -54,6 +54,7 @@
                     <ColGroup>
                         <col />
                         <col />
+                        <col />
                         <col style="width: 1%;" />
                     </ColGroup>
                     <ToolBarContent>
@@ -65,15 +66,22 @@
                     <HeaderContent>
                         <MudTh>Name</MudTh>
                         <MudTh>Department</MudTh>
+                        <MudTh>Disabled</MudTh>
                         <MudTh>Action</MudTh>
                     </HeaderContent>
                     <RowTemplate Context="row">
                         <MudTd DataLabel="Sign">@row.Name</MudTd>
                         <MudTd DataLabel="Sign">@row.ProfileInformation?.MyOrganization?.OrganizationName</MudTd>
                         <MudTd>
+                            @if (row.IsDisabled)
+                            {
+                                <MudChip T="string" Color="Color.Warning" Variant="Variant.Filled">Disabled</MudChip>
+                            }
+                        </MudTd>
+                        <MudTd>
                             <MudMenu Icon="@Icons.Material.Filled.MoreVert" AnchorOrigin="Origin.TopLeft" TransformOrigin="Origin.TopRight" Dense>
-                                <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="() => OpenDialog(Enums.Action.Delete, row)" Label="Edit" />
-                                @* <MudMenuItem Icon="@Icons.Material.Filled.Delete" OnClick="() => DeleteUser(row)" Label="Delete" /> *@
+                                <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="() => OpenDialog(Enums.Action.Update, row)" Label="Edit" />
+                                <MudMenuItem Icon="@Icons.Material.Filled.Block" OnClick="() => ToggleDisableUser(row)" Label="Disable/Enable" />
                             </MudMenu>
                         </MudTd>
                     </RowTemplate>
@@ -102,8 +110,11 @@
         await base.OnInitializedAsync();
 
         _isLoading = true;
+        StateHasChanged();
         UserList = await _userService.GetAllUsers();
         _isLoading = false;
+        
+        StateHasChanged();
     }
 
     private bool FilterFunction(ApplicationUserModel element) => FilterFunction(element, searchString);
@@ -125,33 +136,33 @@
         parameters.Add("Action", action);
         parameters.Add("Model", org);
 
-        var dialog = await _dialogService.ShowAsync<EditUserDialog>(string.Empty, parameters);
+        var dialog = await _dialogService.ShowAsync<EditUserDialog>(string.Empty, parameters, options);
 
         var result = await dialog.Result;
 
-        if (result is not null)
-            if (!result.Canceled)
-            {
-                await OnInitializedAsync();
-            }
+        if (result is not null && !result.Canceled)
+        {
+            await OnInitializedAsync();
+        }
     }
 
-    private async Task DeleteUser(ApplicationUserModel user)
+    private async Task ToggleDisableUser(ApplicationUserModel user)
     {
+        var action = user.IsDisabled ? "enable" : "disable";
         var parameters = new DialogParameters
         {
-            { "Description", $"Are you sure you want to delete \"{user.Name}\"? This will also remove their organizations and all related data. This action cannot be undone." }
+            { "Description", $"Are you sure you want to {action} \"{user.Name}\"?" }
         };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall, FullWidth = true };
-        var dialog = await _dialogService.ShowAsync<ConfirmDialog>("Delete User", parameters, options);
+        var dialog = await _dialogService.ShowAsync<ConfirmDialog>(user.IsDisabled ? "Enable User" : "Disable User", parameters, options);
         var result = await dialog.Result;
 
         if (result is not null && !result.Canceled)
         {
             try
             {
-                await _userService.DeleteUserAsync(user.Id);
-                _snackBar.Add($"User \"{user.Name}\" deleted successfully", Severity.Success);
+                await _userService.DisableUserAsync(user.Id, !user.IsDisabled);
+                _snackBar.Add($"User \"{user.Name}\" {(user.IsDisabled ? "enabled" : "disabled")} successfully", Severity.Success);
                 await OnInitializedAsync();
             }
             catch (Exception ex)

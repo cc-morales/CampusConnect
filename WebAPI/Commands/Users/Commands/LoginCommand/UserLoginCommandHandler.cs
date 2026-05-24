@@ -50,6 +50,13 @@ namespace WebAPI.Commands.Users.Commands.LoginCommand
                     return Result.Failure<TokenModel>(UserErrors.Unauthorized());
                 }
 
+                // If account is disabled, deny login
+                if (user.IsDisabled)
+                {
+                    _logger.LogWarning("Disabled user {UserName} attempted to login", user.UserName);
+                    return Result.Failure<TokenModel>(UserErrors.Unauthorized());
+                }
+
                 // Check if email is verified (only for User role, not Admin)
                 var roles = await _userManager.GetRolesAsync(user);
                 if (roles.Contains(Roles.User))

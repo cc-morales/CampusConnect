@@ -25,5 +25,7 @@ namespace CamCon.Domain.Entity
 
         public bool IsGuest { get; set; } = false;
         public DateTime? GuestExpiresAt { get; set; }
+        
+        public bool IsDisabled { get; set; }
     }
 }

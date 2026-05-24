@@ -82,6 +82,9 @@ namespace WebAPI.Migrations
                     b.Property<DateTime?>("GuestExpiresAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsDisabled")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsGuest")
                         .HasColumnType("bit");
 

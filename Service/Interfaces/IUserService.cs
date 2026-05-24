@@ -14,6 +14,7 @@ namespace Service.Interfaces
         Task<Result> VerifyEmailAsync(string email, string code);
         Task<Result> ResendVerificationCodeAsync(string email);
         Task<Result> DeleteUserAsync(string userId);
+        Task<Result> DisableUserAsync(string userId, bool isDisabled);
         Task<Result> RequestPasswordResetAsync(string email, string baseUrl);
         Task<Result> ResetPasswordAsync(string guid, string newPassword, string confirmPassword);
     }
