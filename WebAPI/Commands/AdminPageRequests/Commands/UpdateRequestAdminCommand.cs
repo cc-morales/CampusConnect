@@ -15,15 +15,9 @@ namespace WebAPI.Commands.AdminPageRequests.Commands
 {
     public record UpdateRequestAdminCommand(AdminPageRequestModel Request, Guid NotificationId) : IRequest<Result>;
 
-    public class UpdateRequestAdminCommandHandler : AppDatabaseBase, IRequestHandler<UpdateRequestAdminCommand, Result>
+    public class UpdateRequestAdminCommandHandler(AppDbContext context, IMediator mediator)
+        : AppDatabaseBase(context), IRequestHandler<UpdateRequestAdminCommand, Result>
     {
-
-        private readonly IMediator _mediator;
-        public UpdateRequestAdminCommandHandler(AppDbContext context, IMediator mediator) : base(context)
-        {
-            _mediator = mediator;
-        }
-
         public async Task<Result> Handle(UpdateRequestAdminCommand request, CancellationToken cancellationToken)
         {
             try
@@ -63,7 +57,7 @@ namespace WebAPI.Commands.AdminPageRequests.Commands
                             OrganizationDepartment = new OrganizationDepartmentModel() { MyOrganizationId = request.Request.Department.MyOrganizationId }
                         };
 
-                        await _mediator.Send(new CreateOrganizationCommand(newOrg), cancellationToken);
+                        await mediator.Send(new CreateOrganizationCommand(newOrg), cancellationToken);
                     }
                     else if (pageRequest.PageRequestType is Enums.PageRequestType.Contributor)
                     {
@@ -74,17 +68,18 @@ namespace WebAPI.Commands.AdminPageRequests.Commands
                             Id = pageRequest.Id ?? string.Empty
                         };
 
-                        await _mediator.Send(new AddContributorCommand(contributor), cancellationToken);
+                        await mediator.Send(new AddContributorCommand(contributor), cancellationToken);
                     }
                 }
+                
+                var fcm = GetDBContext().DeviceFcms.FirstOrDefault(c => c.UserId == request.Request.User.Id);
 
-
-                await _mediator.Publish(new UserNotificationEvent(notify.NotifyId, request.Request.Id));
+                await mediator.Publish(new UserNotificationEvent(notify.NotifyId, request.Request.Id, fcm.FcmToken), cancellationToken);
 
                 var profile = await GetDBContext().ProfileInformations.FirstOrDefaultAsync(p => p.ProfileInformationId == request.Request.User.ProfileInformationId, cancellationToken: cancellationToken);
 
                 if(profile is not null)
-                    await _mediator.Send(new UserUpdateProfileCommand(profile, true), cancellationToken);
+                    await mediator.Send(new UserUpdateProfileCommand(profile, true), cancellationToken);
 
                 return Result.Success();
             }

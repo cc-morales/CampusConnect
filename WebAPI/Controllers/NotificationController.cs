@@ -65,5 +65,13 @@ namespace WebAPI.Controllers
 
             return Ok(result);
         }
+        
+        [HttpPost("register-fcm")]
+        public async Task<IActionResult> RegisterFcm([FromBody]RegisterFcmCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            return Ok(result);
+        }
     }
 }

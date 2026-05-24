@@ -1,4 +1,5 @@
 ﻿using CamCon.Shared;
+using CamCon.Shared.Extensions;
 using Domain;
 using Domain.Models;
 using Microsoft.Extensions.Configuration;
@@ -80,6 +81,15 @@ namespace Service.Services.NotificationServices
             request.Data = null;
 
             return await _baseService.SendAsync<Result>(request);
+        }
+
+        public async Task RegisterFcm(string fcm, string userId)
+        {
+            request.RequestUrl = $"{defaultRequestUrl}/register-fcm";
+            request.RequestType = Enums.RequestType.POST;
+            request.Data = new DeviceFcm { FcmToken = fcm, UserId = userId }.Wrap("request");
+
+            await _baseService.SendAsync<Result>(request);
         }
     }
 }
