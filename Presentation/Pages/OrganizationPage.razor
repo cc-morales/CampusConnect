@@ -60,7 +60,7 @@
                         <MudText Typo="Typo.h6">Organizations/Departments</MudText>
                         <MudSpacer />
                         <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-                        <MudIconButton OnClick="() => OpenDialog(Enums.Action.Create, new())" Icon="@Icons.Material.Filled.Add"></MudIconButton>
+                        <MudIconButton OnClick="() => OpenDialog(Enums.Action.Create, new MyOrganizationModel())" Icon="@Icons.Material.Filled.Add"></MudIconButton>
                     </ToolBarContent>
                     <HeaderContent>
                         <MudTh>Name</MudTh>
@@ -74,8 +74,8 @@
                         <MudTd DataLabel="Sign">@row.User?.Name</MudTd>
                         <MudTd>
                             <MudMenu Icon="@Icons.Material.Filled.MoreVert" AnchorOrigin="Origin.TopLeft" TransformOrigin="Origin.TopRight" Dense>
-                                <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="() => OpenDialog(Enums.Action.Delete, row)" Label="Edit" />
-                                <MudMenuItem Icon="@Icons.Material.Filled.Delete" Label="Delete" />
+                            <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="() => OpenDialog(Enums.Action.Update, row)" Label="Edit" />
+                            <MudMenuItem Icon="@Icons.Material.Filled.Delete" OnClick="() => ConfirmDelete(row)" Label="Delete" />
                             </MudMenu>
                         </MudTd>
                     </RowTemplate>
@@ -102,6 +102,8 @@
         await base.OnInitializedAsync();
 
         MyOrganizationList = await _organizationService.GetAllOrganizationsAsync();
+
+        await InvokeAsync(StateHasChanged);
     }
 
     private bool FilterFunction(MyOrganizationModel element) => FilterFunction(element, searchString);
@@ -139,5 +141,31 @@
             {
                 await OnInitializedAsync();
             }
+    }
+
+    private async Task ConfirmDelete(MyOrganizationModel org)
+    {
+        var parameters = new DialogParameters {
+            ["Description"] = $"Are you sure you want to delete '{org.OrganizationName}'? This action cannot be undone."
+        };
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Small };
+
+        var dialog = await _dialogService.ShowAsync<ConfirmDialog>("Confirm", parameters, options);
+        var result = await dialog.Result;
+
+        if (result?.Canceled is false)
+        {
+            var res = await _organizationService.DeleteOrganizationAsync(org.MyOrganizationId);
+            if (res.IsSuccess)
+            {
+                await OnInitializedAsync();
+            }
+            else
+            {
+                // Show error
+                _snackBar.Add(res.Error?.Description ?? "Failed to delete organization.", Severity.Error);
+            }
+        }
     }
 }

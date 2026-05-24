@@ -54,6 +54,17 @@ namespace WebAPI.Controllers
             return Ok(result);
         }
 
+        [HttpDelete("{organizationId}")]
+        public async Task<IActionResult> DeleteOrganization(Guid organizationId)
+        {
+            var result = await _mediator.Send(new DeleteOrganizationCommand(organizationId));
+
+            if (result.IsSuccess)
+                return Ok(result);
+
+            return StatusCode(result.Error.Code, result.Error.Description);
+        }
+
         [HttpPatch("{organizationId}/follow")]
         public async Task<IActionResult> ToggleFollow(Guid organizationId, [FromBody] ToggleFollowRequest request)
         {

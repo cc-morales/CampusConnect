@@ -36,7 +36,11 @@ namespace Service.Services.OrganizationServices
 
         public Task<Result> DeleteOrganizationAsync(Guid organizationId)
         {
-            throw new NotImplementedException();
+            request.RequestUrl = $"{defaultRequestUrl}/{organizationId}";
+            request.RequestType = Enums.RequestType.DELETE;
+            request.Data = null;
+
+            return _baseService.SendAsync<Result>(request);
         }
 
         public async Task<List<MyOrganizationModel>> GetAllOrganizationsAsync()

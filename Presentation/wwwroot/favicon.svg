@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="456" height="456" viewBox="0 0 456 456" version="1.1" xmlns="http://www.w3.org/2000/svg" xml:space="preserve">
+
+  <!-- Safe zone center: 320x320 starting at x=68, y=68 -->
+
+    <!-- Outer ring -->
+    <circle cx="228" cy="228" r="150" fill="none" stroke="#ffffff" stroke-width="8" opacity="0.3"/>
+
+    <!-- Inner circle background -->
+    <circle cx="228" cy="228" r="130" fill="#ffffff" opacity="0.12"/>
+
+    <!-- CC text -->
+    <text
+            x="210"
+            y="268"
+            text-anchor="middle"
+            font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+            font-size="190"
+            font-weight="700"
+            letter-spacing="-8"
+            fill="#ffffff">CC</text>
+
+    <!-- Small label below -->
+    <text
+            x="228"
+            y="318"
+            text-anchor="middle"
+            font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+            font-size="35"
+            font-weight="500"
+            letter-spacing="6"
+            fill="#ffffff"
+            opacity="0.7">CAMPUS CONNECT</text>
+
+</svg>
