@@ -23,6 +23,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUserModel>
     public DbSet<LikeModel> Likes { get; set; }
     public DbSet<Contributors> Contributors { get; set; }
     public DbSet<Follower> Followers { get; set; }
+    public DbSet<DeviceFcm> DeviceFcms { get; set; }
 
     public DbSet<SentimentModel> Sentiments { get; set; }
 
@@ -64,7 +65,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUserModel>
         builder.Entity<SentimentModel>().ToTable("Sentiments");
         builder.Entity<Contributors>().ToTable("Contributors");
         builder.Entity<Follower>().ToTable("Followers");
-
+        builder.Entity<DeviceFcm>().ToTable("DeviceFcms");
 
         // Global Filter
         builder.Entity<NewsFeedCommentModel>().HasQueryFilter(e => !e.IsDeleted);

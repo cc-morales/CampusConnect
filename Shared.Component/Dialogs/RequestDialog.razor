@@ -45,7 +45,7 @@
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Primary" OnClick="Submit" Variant="Variant.Filled">Save</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit" Disabled="_isLoading" Variant="Variant.Filled">@(_isLoading ? "Sending..." : "Send")</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -70,7 +70,8 @@
     private IList<IBrowserFile> _files = new List<IBrowserFile>();
 
     private List<PageRequestImageModel> requestedFiles = new();
-    
+
+    private bool _isLoading;
 
     private void UploadFiles(IBrowserFile file)
     {
@@ -119,6 +120,8 @@
 
     private async Task Submit()
     {
+        
+        
         Model.MyOrganizationId = _appStateService.CurrentUser.ProfileInformation?.MyOrganizationId;
         Model.MyOrganization = _appStateService.CurrentUser.ProfileInformation?.MyOrganization;
         Model.Id = _appStateService.CurrentUser.Id;
@@ -154,6 +157,7 @@
         if (result is not null) {
             if (!result.Canceled)
             {
+                _isLoading = true;
                 await _pageRequestService.CreatePageRequestAsync(Model);
 
                 _snackBar.Add("Your request has been submitted successfully.", Severity.Success);
@@ -162,6 +166,8 @@
         {
             _snackBar.Add("There was a problem sending your request.", Severity.Error);
         }
+
+        _isLoading = false;
 
         MudDialog.Close(DialogResult.Ok(true));
     }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1084027743171",
+    "project_id": "push-notification-a02c9",
+    "storage_bucket": "push-notification-a02c9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1084027743171:android:37354a92bcc4952927ab76",
+        "android_client_info": {
+          "package_name": "com.campusconnect.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhJOzMnvZc19E-ZsFHIoNMvuUqFhrunpc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

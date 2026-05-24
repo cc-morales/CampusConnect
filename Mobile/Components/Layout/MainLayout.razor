@@ -1,6 +1,7 @@
 ﻿@using System.Text.Json
 @using Domain
 @using Mobile.Components.Pages.Dialogs
+@using Shared.Component.Extensions
 
 @inherits LayoutComponentBase
 
@@ -61,7 +62,7 @@
                     </ChildContent>
                 </MudMenu>
                 <MudSpacer />
-                <MudText Class="mr-2" Typo="Typo.body2">Welcome, @_appStateService.CurrentUser.UserName</MudText>
+                <MudText Class="mr-2" Typo="Typo.body2">Welcome, @(_appStateService.CurrentUser.ProfileInformation is null ? _appStateService.CurrentUser.Name.GetFirstName() : _appStateService.CurrentUser.ProfileInformation.FullName.GetFirstName())</MudText>
                 <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer"></MudIconButton>
             </MudAppBar>
             <MudDrawer @bind-Open="@_open" Breakpoint="Breakpoint.Lg" Elevation="1" Anchor="Anchor.End" Variant="@DrawerVariant.Responsive">

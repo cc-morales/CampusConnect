@@ -11,5 +11,6 @@ namespace Service.Interfaces
         Task<Result> DeleteNotificationAsync(Guid notifyId, bool isAdmin = false);
         Task<Result> ClearAllNotificationsAsync(string recipientUserId);
         Task<Result> ClearAllAsync();
+        Task RegisterFcm(string fcm, string userId);
     }
 }

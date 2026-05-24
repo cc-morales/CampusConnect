@@ -8,39 +8,33 @@ using Service.Notifiers;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Plugin.Firebase.CloudMessaging;
 
 namespace Mobile.Authentication
 {
-    public class CustomAuthenticationState : AuthenticationStateProvider
+    public class CustomAuthenticationState(
+        ILocalStorageService localStorage,
+        IJSRuntime jsRuntime,
+        IUserService userService,
+        AppStateService appStateService,
+        INotificationService notificationService)
+        : AuthenticationStateProvider
     {
-        private readonly ILocalStorageService _localStorage;
-        private readonly IJSRuntime _jsRuntime;
-        private readonly IUserService _userService;
-        private readonly AppStateService _appstateService;
-        private readonly HubNotificationService _hubNotificationService;
-
-        public CustomAuthenticationState(ILocalStorageService localStorage, IJSRuntime jsRuntime, IUserService userService, AppStateService appStateService, HubNotificationService hubnotificationService)
-        {
-            _localStorage = localStorage;
-            _jsRuntime = jsRuntime;
-            _userService = userService;
-            _appstateService = appStateService;
-            _hubNotificationService = hubnotificationService;
-        }
+ 
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            if (_jsRuntime is IJSInProcessRuntime)
+            if (jsRuntime is IJSInProcessRuntime)
             {
                 //do nothing
             }
-            else if (_jsRuntime is null)
+            else if (jsRuntime is null)
             {
                 return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
             }
             try
             {
-                var currentToken = await _localStorage.GetItemAsync<TokenModel>("token");
+                var currentToken = await localStorage.GetItemAsync<TokenModel>("token");
 
                 if (currentToken is not null)
                 {
@@ -51,7 +45,7 @@ namespace Mobile.Authentication
                         var expirationTime = DateTimeOffset.FromUnixTimeSeconds(exp);
                         if (expirationTime < DateTimeOffset.UtcNow)
                         {
-                            await _localStorage.RemoveItemAsync("token");
+                            await localStorage.RemoveItemAsync("token");
                             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
                         }
                     }
@@ -113,9 +107,14 @@ namespace Mobile.Authentication
 
                 var userId = authenticatedUser.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
 
-                var user = await _userService.GetUserById(userId!);
+                var user = await userService.GetUserById(userId!);
+                
+                await CrossFirebaseCloudMessaging.Current.CheckIfValidAsync();
+                var currentFcmToken = await CrossFirebaseCloudMessaging.Current.GetTokenAsync();
 
-                _appstateService.CurrentUser = user;
+                await notificationService.RegisterFcm(currentFcmToken, userId);
+
+                appStateService.CurrentUser = user;
 
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
