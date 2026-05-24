@@ -21,12 +21,12 @@ namespace Mobile
             WebViewSoftInputPatch.Initialize();
             CreateNotificationChannelIfNeeded();
 
-
-            if (Build.VERSION.SdkInt < BuildVersionCodes.Tiramisu) return; 
-            
-            if (CheckSelfPermission(Android.Manifest.Permission.PostNotifications) != Permission.Granted)
+            if (OperatingSystem.IsAndroidVersionAtLeast(33))
             {
-                RequestPermissions([Android.Manifest.Permission.PostNotifications], 1001);
+                if (CheckSelfPermission(Android.Manifest.Permission.PostNotifications) != Permission.Granted)
+                {
+                    RequestPermissions([Android.Manifest.Permission.PostNotifications], 1001);
+                }
             }
         }
         
@@ -51,11 +51,14 @@ namespace Mobile
         private void CreateNotificationChannel()
         {
             // Platform compatibility: NotificationChannel requires Android O (API 26)+
-            var channelId = $"{PackageName}.general";
-            var notificationManager = (NotificationManager) GetSystemService(NotificationService)!;
-            var channel = new NotificationChannel(channelId, "General", NotificationImportance.Default);
-            notificationManager.CreateNotificationChannel(channel);
-            FirebaseCloudMessagingImplementation.ChannelId = channelId;
+            if (OperatingSystem.IsAndroidVersionAtLeast(26))
+            {
+                var channelId = $"{PackageName}.general";
+                var notificationManager = (NotificationManager)GetSystemService(NotificationService)!;
+                var channel = new NotificationChannel(channelId, "General", NotificationImportance.Default);
+                notificationManager.CreateNotificationChannel(channel);
+                FirebaseCloudMessagingImplementation.ChannelId = channelId;
+            }
         }   
     }
 }
