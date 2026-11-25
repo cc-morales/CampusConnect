@@ -28,12 +28,12 @@ jobs:
     timeout-minutes: 5
     steps:
       # No checkout or third-party actions: never execute code from a pull request.
-      # Set the CLICKUP_API_TOKEN Actions secret. ClickUp is accessed with GET only.
+      # Set the CLICKUP_TOKEN Actions secret. ClickUp is accessed with GET only.
       # For automatic matching, include the task ID/link in the PR title, body or branch,
       # or include this repository's PR URL in the ClickUp description.
       - name: Read ClickUp task and append text without images
         env:
-          CLICKUP_API_TOKEN: ${{ secrets.CLICKUP_API_TOKEN }}
+          CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
           CLICKUP_WORKSPACE_ID: ${{ vars.CLICKUP_WORKSPACE_ID }}
           GITHUB_TOKEN: ${{ github.token }}
           TASK_ID: ${{ inputs.task_id || github.event.client_payload.task_id }}
@@ -114,7 +114,7 @@ jobs:
             if (env.GITHUB_REPOSITORY !== repository) throw new Error('This workflow only updates cc-morales/CampusConnect.');
             const taskId = env.TASK_ID?.trim();
             if (!/^[a-zA-Z0-9_-]+$/.test(taskId ?? '')) throw new Error('A valid ClickUp task_id is required.');
-            if (!env.CLICKUP_API_TOKEN) throw new Error('Add the CLICKUP_API_TOKEN repository Actions secret before running this workflow.');
+            if (!env.CLICKUP_TOKEN) throw new Error('Add the CLICKUP_TOKEN repository Actions secret before running this workflow.');
             if (!env.GITHUB_TOKEN) throw new Error('The GitHub Actions token is missing.');
             const request = async (url, token, method = 'GET', body) => {
               const response = await fetcher(url, {
@@ -135,7 +135,7 @@ jobs:
               query.set('team_id', env.CLICKUP_WORKSPACE_ID);
             }
             // ClickUp access is read-only: never create or update a task.
-            const task = await request(`https://api.clickup.com/api/v2/task/${encodeURIComponent(taskId)}?${query}`, env.CLICKUP_API_TOKEN);
+            const task = await request(`https://api.clickup.com/api/v2/task/${encodeURIComponent(taskId)}?${query}`, env.CLICKUP_TOKEN);
             const api = `https://api.github.com/repos/${repository}`;
             const token = `Bearer ${env.GITHUB_TOKEN}`;
             let prNumber;
