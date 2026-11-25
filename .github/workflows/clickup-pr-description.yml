@@ -131,13 +131,16 @@ jobs:
             const task = await request(`https://api.clickup.com/api/v2/task/${encodeURIComponent(taskId)}?${query}`, env.CLICKUP_TOKEN);
             const api = `https://api.github.com/repos/${repository}`;
             const token = `Bearer ${env.GITHUB_TOKEN}`;
-            const prs = [];
-            for (let page = 1; ; page++) {
-              const batch = await request(`${api}/pulls?state=open&per_page=100&page=${page}`, token);
-              prs.push(...batch);
-              if (batch.length < 100) break;
-            }
-            const matches = findMatchingPrs(prs, task);
+            const matchingOpenPrs = async () => {
+              const prs = [];
+              for (let page = 1; ; page++) {
+                const batch = await request(`${api}/pulls?state=open&per_page=100&page=${page}`, token);
+                prs.push(...batch);
+                if (batch.length < 100) break;
+              }
+              return findMatchingPrs(prs, task);
+            };
+            const matches = await matchingOpenPrs();
             if (matches.length !== 1) throw new Error(`Found ${matches.length} matching open PR branches. Exactly one open PR branch must contain the ClickUp task ID or custom ID.`);
             const prNumber = matches[0].number;
             // Fetch the latest description immediately before updating it.
@@ -146,7 +149,14 @@ jobs:
             if (findMatchingPrs([pr], task).length !== 1) throw new Error('The PR branch no longer matches the task ID; no changes made.');
             const body = appendTask(pr.body, task);
             if (body.length > 65536) throw new Error('The combined PR description exceeds GitHub\'s limit; no changes made.');
-            if (body !== (pr.body ?? '')) await request(`${api}/pulls/${prNumber}`, token, 'PATCH', { body });
+            if (body !== (pr.body ?? '')) {
+              // Repeat the full lookup: another matching PR may have opened since selection.
+              const currentMatches = await matchingOpenPrs();
+              if (currentMatches.length !== 1 || currentMatches[0].number !== prNumber) {
+                throw new Error('Matching open PR branches changed before writing; no changes made.');
+              }
+              await request(`${api}/pulls/${prNumber}`, token, 'PATCH', { body });
+            }
             const result = `ClickUp task description synced to https://github.com/${repository}/pull/${prNumber}`;
             console.log(result);
             if (env.GITHUB_STEP_SUMMARY) appendFileSync(env.GITHUB_STEP_SUMMARY, result + '\n');
