@@ -9,10 +9,6 @@ on:
         description: ClickUp internal task ID
         required: true
         type: string
-      pr_number:
-        description: CampusConnect PR number (optional when the task ID or link is in the PR)
-        required: false
-        type: string
 
 permissions:
   pull-requests: write
@@ -29,15 +25,14 @@ jobs:
     steps:
       # No checkout or third-party actions: never execute code from a pull request.
       # Set the CLICKUP_TOKEN Actions secret. ClickUp is accessed with GET only.
-      # For automatic matching, include the task ID/link in the PR title, body or branch,
-      # or include this repository's PR URL in the ClickUp description.
+      # Exactly one open PR branch must contain the task ID or custom ID.
+      # PR titles, descriptions and task-side PR links are not used for matching.
       - name: Read ClickUp task and append text without images
         env:
           CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
           CLICKUP_WORKSPACE_ID: ${{ vars.CLICKUP_WORKSPACE_ID }}
           GITHUB_TOKEN: ${{ github.token }}
           TASK_ID: ${{ inputs.task_id || github.event.client_payload.task_id }}
-          PR_NUMBER: ${{ inputs.pr_number || github.event.client_payload.pr_number }}
         shell: bash
         run: |
           node --input-type=module <<'NODE'
@@ -99,14 +94,12 @@ jobs:
             return from < 0 ? body + (body ? '\n\n' : '') + section : body.slice(0, from) + section + body.slice(to + end.length);
           }
           
-          export function findMatchingPrs(prs, task, repository) {
+          export function findMatchingPrs(prs, task) {
             const escape = value => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const ids = [task.id, task.custom_id].filter(Boolean);
             const patterns = ids.map(id => new RegExp(`(?<![a-zA-Z0-9])${escape(id)}(?![a-zA-Z0-9])`, 'i'));
-            const description = task.markdown_description || task.description || task.text_content || '';
-            const linkedNumbers = new Set(Array.from(description.matchAll(new RegExp(`https://github\\.com/${escape(repository)}/pull/(\\d+)(?!\\d)`, 'gi')), match => Number(match[1])));
-            return prs.filter(pr => pr.state === 'open' && (linkedNumbers.has(pr.number) ||
-              patterns.some(pattern => pattern.test(`${pr.title ?? ''}\n${pr.body ?? ''}\n${pr.head?.ref ?? ''}`))));
+            return prs.filter(pr => pr.state === 'open' &&
+              patterns.some(pattern => pattern.test(pr.head?.ref ?? '')));
           }
           
           export async function run(env = process.env, fetcher = fetch) {
@@ -138,24 +131,19 @@ jobs:
             const task = await request(`https://api.clickup.com/api/v2/task/${encodeURIComponent(taskId)}?${query}`, env.CLICKUP_TOKEN);
             const api = `https://api.github.com/repos/${repository}`;
             const token = `Bearer ${env.GITHUB_TOKEN}`;
-            let prNumber;
-            if (env.PR_NUMBER?.trim()) {
-              if (!/^[1-9]\d*$/.test(env.PR_NUMBER.trim())) throw new Error('pr_number must be a positive integer.');
-              prNumber = Number(env.PR_NUMBER.trim());
-            } else {
-              const prs = [];
-              for (let page = 1; ; page++) {
-                const batch = await request(`${api}/pulls?state=open&per_page=100&page=${page}`, token);
-                prs.push(...batch);
-                if (batch.length < 100) break;
-              }
-              const matches = findMatchingPrs(prs, task, repository);
-              if (matches.length !== 1) throw new Error(`Found ${matches.length} matching open PRs. Link the ClickUp task in the PR title, body or branch, put the CampusConnect PR URL in the task description, or run manually with pr_number.`);
-              prNumber = matches[0].number;
+            const prs = [];
+            for (let page = 1; ; page++) {
+              const batch = await request(`${api}/pulls?state=open&per_page=100&page=${page}`, token);
+              prs.push(...batch);
+              if (batch.length < 100) break;
             }
+            const matches = findMatchingPrs(prs, task);
+            if (matches.length !== 1) throw new Error(`Found ${matches.length} matching open PR branches. Exactly one open PR branch must contain the ClickUp task ID or custom ID.`);
+            const prNumber = matches[0].number;
             // Fetch the latest description immediately before updating it.
             const pr = await request(`${api}/pulls/${prNumber}`, token);
             if (pr.state !== 'open') throw new Error('The selected PR is closed; no changes made.');
+            if (findMatchingPrs([pr], task).length !== 1) throw new Error('The PR branch no longer matches the task ID; no changes made.');
             const body = appendTask(pr.body, task);
             if (body.length > 65536) throw new Error('The combined PR description exceeds GitHub\'s limit; no changes made.');
             if (body !== (pr.body ?? '')) await request(`${api}/pulls/${prNumber}`, token, 'PATCH', { body });
