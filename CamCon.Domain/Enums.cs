@@ -49,5 +49,11 @@ namespace CamCon.Domain
             Contributor
         }
 
+        public enum Sample 
+        {
+            get,
+            set
+        }
+
     }
 }
