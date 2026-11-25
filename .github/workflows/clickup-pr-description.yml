@@ -1,0 +1,173 @@
+name: Append ClickUp task description to PR
+
+on:
+  repository_dispatch:
+    types: [clickup-update]
+  workflow_dispatch:
+    inputs:
+      task_id:
+        description: ClickUp internal task ID
+        required: true
+        type: string
+      pr_number:
+        description: CampusConnect PR number (optional when the task ID or link is in the PR)
+        required: false
+        type: string
+
+permissions:
+  pull-requests: write
+
+concurrency:
+  group: clickup-pr-description-${{ inputs.task_id || github.event.client_payload.task_id }}
+  cancel-in-progress: false
+
+jobs:
+  append-description:
+    if: github.repository == 'cc-morales/CampusConnect'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # No checkout or third-party actions: never execute code from a pull request.
+      # Set the CLICKUP_API_TOKEN Actions secret. ClickUp is accessed with GET only.
+      # For automatic matching, include the task ID/link in the PR title, body or branch,
+      # or include this repository's PR URL in the ClickUp description.
+      - name: Read ClickUp task and append text without images
+        env:
+          CLICKUP_API_TOKEN: ${{ secrets.CLICKUP_API_TOKEN }}
+          CLICKUP_WORKSPACE_ID: ${{ vars.CLICKUP_WORKSPACE_ID }}
+          GITHUB_TOKEN: ${{ github.token }}
+          TASK_ID: ${{ inputs.task_id || github.event.client_payload.task_id }}
+          PR_NUMBER: ${{ inputs.pr_number || github.event.client_payload.pr_number }}
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { appendFileSync } from 'node:fs';
+          
+          const imageUrl = /\.(?:png|jpe?g|gif|webp|svg|avif|bmp|tiff?|heic|ico)(?:[?#][^\s<>"']*)?$/i;
+          
+          export function withoutImages(markdown, attachments = []) {
+            let text = String(markdown ?? '');
+            const references = new Set();
+            text = text.replace(/!\[[^\]]*\]\((?:[^()\\]|\\.|\([^()]*\))*\)/g, '');
+            text = text.replace(/!\[([^\]]*)\](?:\s*\[([^\]]*)\])?/g, (_, label, reference) => {
+              references.add((reference || label).trim().toLowerCase());
+              return '';
+            });
+            text = text.replace(/^ {0,3}\[([^\]]+)\]:\s*(\S+).*$/gm, (line, label, url) =>
+              references.has(label.trim().toLowerCase()) || imageUrl.test(url.replace(/^<|>$/g, '')) ? '' : line);
+            text = text.replace(/<(picture|svg)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, '');
+            text = text.replace(/<(?:img|source)\b[^>]*>/gi, '');
+            text = text.replace(/<!--[^]*?-->/g, '');
+            text = text.replace(/\[([^\]]*)\]\(([^\s]+?)(?:\s+"[^"]*")?\)/g, (link, label, url) =>
+              imageUrl.test(url.replace(/^<|>$/g, '')) ? '' : link);
+            text = text.replace(/<a\b[^>]*href=["']([^"']+)["'][^>]*>[\s\S]*?<\/a\s*>/gi, (link, url) =>
+              imageUrl.test(url) ? '' : link);
+            for (const attachment of attachments) {
+              if (String(attachment.mimetype ?? '').startsWith('image/') || imageUrl.test(String(attachment.title ?? ''))) {
+                for (const url of [attachment.url, attachment.url_w_query, attachment.url_w_host, attachment.thumbnail_small, attachment.thumbnail_medium, attachment.thumbnail_large]) {
+                  if (typeof url === 'string' && url) text = text.split(url).join('');
+                }
+              }
+            }
+            text = text.replace(/https?:\/\/[^\s<>"']+/gi, url => imageUrl.test(url) ? '' : url);
+            text = text.replace(/data:image\/[^\s<>"')]+/gi, '');
+            return text.replace(/\n[\t ]+\n/g, '\n\n').replace(/\n{3,}/g, '\n\n').trim();
+          }
+          
+          export function taskSection(task) {
+            if (!/^[a-zA-Z0-9_-]+$/.test(task.id ?? '')) throw new Error('ClickUp returned an invalid task ID.');
+            const description = withoutImages(task.markdown_description || task.description || task.text_content || '', task.attachments);
+            return [
+              `<!-- clickup-task:${task.id}:start -->`,
+              '### ClickUp task',
+              '',
+              `[View task ${task.custom_id || task.id}](https://app.clickup.com/t/${encodeURIComponent(task.id)})`,
+              '',
+              description || '_No text description provided._',
+              `<!-- clickup-task:${task.id}:end -->`,
+            ].join('\n');
+          }
+          
+          export function appendTask(body, task) {
+            body ??= '';
+            const section = taskSection(task);
+            const start = `<!-- clickup-task:${task.id}:start -->`;
+            const end = `<!-- clickup-task:${task.id}:end -->`;
+            const from = body.indexOf(start);
+            const to = from < 0 ? -1 : body.indexOf(end, from);
+            if (from >= 0 && to < 0) throw new Error('Existing ClickUp section is incomplete; refusing to overwrite PR text.');
+            return from < 0 ? body + (body ? '\n\n' : '') + section : body.slice(0, from) + section + body.slice(to + end.length);
+          }
+          
+          export function findMatchingPrs(prs, task, repository) {
+            const escape = value => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const ids = [task.id, task.custom_id].filter(Boolean);
+            const patterns = ids.map(id => new RegExp(`(?<![a-zA-Z0-9])${escape(id)}(?![a-zA-Z0-9])`, 'i'));
+            const description = task.markdown_description || task.description || task.text_content || '';
+            const linkedNumbers = new Set(Array.from(description.matchAll(new RegExp(`https://github\\.com/${escape(repository)}/pull/(\\d+)(?!\\d)`, 'gi')), match => Number(match[1])));
+            return prs.filter(pr => pr.state === 'open' && (linkedNumbers.has(pr.number) ||
+              patterns.some(pattern => pattern.test(`${pr.title ?? ''}\n${pr.body ?? ''}\n${pr.head?.ref ?? ''}`))));
+          }
+          
+          export async function run(env = process.env, fetcher = fetch) {
+            const repository = 'cc-morales/CampusConnect';
+            if (env.GITHUB_REPOSITORY !== repository) throw new Error('This workflow only updates cc-morales/CampusConnect.');
+            const taskId = env.TASK_ID?.trim();
+            if (!/^[a-zA-Z0-9_-]+$/.test(taskId ?? '')) throw new Error('A valid ClickUp task_id is required.');
+            if (!env.CLICKUP_API_TOKEN) throw new Error('Add the CLICKUP_API_TOKEN repository Actions secret before running this workflow.');
+            if (!env.GITHUB_TOKEN) throw new Error('The GitHub Actions token is missing.');
+            const request = async (url, token, method = 'GET', body) => {
+              const response = await fetcher(url, {
+                method,
+                redirect: 'error',
+                signal: AbortSignal.timeout(30000),
+                headers: { Authorization: token, Accept: 'application/json', 'Content-Type': 'application/json' },
+                ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+              });
+              if (!response.ok) throw new Error(`${new URL(url).hostname} ${method} failed with HTTP ${response.status}.`);
+              return response.json();
+            };
+          
+            const query = new URLSearchParams({ include_markdown_description: 'true' });
+            if (/^[a-zA-Z]+-\d+$/.test(taskId)) {
+              if (!/^\d+$/.test(env.CLICKUP_WORKSPACE_ID ?? '')) throw new Error('Custom task IDs require the CLICKUP_WORKSPACE_ID repository variable. Use the internal task ID instead.');
+              query.set('custom_task_ids', 'true');
+              query.set('team_id', env.CLICKUP_WORKSPACE_ID);
+            }
+            // ClickUp access is read-only: never create or update a task.
+            const task = await request(`https://api.clickup.com/api/v2/task/${encodeURIComponent(taskId)}?${query}`, env.CLICKUP_API_TOKEN);
+            const api = `https://api.github.com/repos/${repository}`;
+            const token = `Bearer ${env.GITHUB_TOKEN}`;
+            let prNumber;
+            if (env.PR_NUMBER?.trim()) {
+              if (!/^[1-9]\d*$/.test(env.PR_NUMBER.trim())) throw new Error('pr_number must be a positive integer.');
+              prNumber = Number(env.PR_NUMBER.trim());
+            } else {
+              const prs = [];
+              for (let page = 1; ; page++) {
+                const batch = await request(`${api}/pulls?state=open&per_page=100&page=${page}`, token);
+                prs.push(...batch);
+                if (batch.length < 100) break;
+              }
+              const matches = findMatchingPrs(prs, task, repository);
+              if (matches.length !== 1) throw new Error(`Found ${matches.length} matching open PRs. Link the ClickUp task in the PR title, body or branch, put the CampusConnect PR URL in the task description, or run manually with pr_number.`);
+              prNumber = matches[0].number;
+            }
+            // Fetch the latest description immediately before updating it.
+            const pr = await request(`${api}/pulls/${prNumber}`, token);
+            if (pr.state !== 'open') throw new Error('The selected PR is closed; no changes made.');
+            const body = appendTask(pr.body, task);
+            if (body.length > 65536) throw new Error('The combined PR description exceeds GitHub\'s limit; no changes made.');
+            if (body !== (pr.body ?? '')) await request(`${api}/pulls/${prNumber}`, token, 'PATCH', { body });
+            const result = `ClickUp task description synced to https://github.com/${repository}/pull/${prNumber}`;
+            console.log(result);
+            if (env.GITHUB_STEP_SUMMARY) appendFileSync(env.GITHUB_STEP_SUMMARY, result + '\n');
+            return prNumber;
+          }
+          
+          if (process.env.GITHUB_ACTIONS === 'true') {
+            try { await run(); }
+            catch (error) { console.error(error.message); process.exitCode = 1; }
+          }
+          
+          NODE
